@@ -163,6 +163,11 @@ async function initViewPage() {
   const e = items.find(i => String(i.id) === id);
   if (!e) { root.innerHTML = `<div class="empty">މި ލިޔުން ނުފެނުނު</div>`; return; }
   document.title = `${e.title} | ކޭސްލޯ އެމްވީ`;
+  let principlesLink = "";
+  if (key !== "principles" && e.source === "sc") {
+    const pr = (await fetchJson("data/sc-principles.json")).find(p => String(p.id) === String(e.id));
+    if (pr) principlesLink = `<a class="btn" style="background:var(--accent)" href="view.html?cat=principles&id=${encodeURIComponent(e.id)}">މި މައްސަލައިގެ ޤާނޫނީ އުސޫލުތައް</a>`;
+  }
   root.innerHTML = `<article class="article">
     <h1>${esc(e.title)}</h1>
     <div class="meta">
@@ -177,6 +182,7 @@ async function initViewPage() {
     ${e.body ? `<div class="body">${paragraphs(e.body)}</div>` :
       (e.source === "sc" && key !== "principles" ? `<p class="hint" style="margin-top:20px">މި ނިންމުމުގެ ފުރިހަމަ ލިޔުން ސުޕްރީމް ކޯޓުގެ ވެބްސައިޓުން ކިޔުއްވޭނެ.</p>` : "")}
     <p style="display:flex;gap:8px;flex-wrap:wrap;margin-top:20px">
+      ${principlesLink}
       ${e.pdf ? `<a class="btn" href="${esc(e.pdf)}" target="_blank" rel="noopener">ނިންމުމުގެ ފުރިހަމަ ލިޔުން (PDF)</a>` : ""}
       ${e.url ? `<a class="btn secondary" href="${esc(e.url)}" target="_blank" rel="noopener">ސުޕްރީމް ކޯޓުގެ ވެބްސައިޓުގައި ބަލާ ↗</a>` : ""}
     </p>

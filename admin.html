@@ -34,6 +34,7 @@
   <!-- Dashboard -->
   <div id="dash" style="display:none">
     <div class="admin-tabs" id="adminTabs"></div>
+    <div id="catPanels">
 
     <section class="panel">
       <h2 id="formTitle">އައު ލިޔުމެއް</h2>
@@ -89,6 +90,25 @@
     <section class="panel">
       <h2>ޝާއިޢު ކޮށްފައިވާ ލިޔުންތައް</h2>
       <div id="adminList"></div>
+    </section>
+
+    </div>
+
+    <!-- Judgment PDF inbox for automatic legal-principle extraction -->
+    <section class="panel" id="inboxPanel" style="display:none">
+      <h2>ޤާނޫނީ އުސޫލު ލިޔުމަށް ޖަޖްމަންޓް PDF އަޕްލޯޑް</h2>
+      <p class="hint">ސުޕްރީމް ކޯޓުގެ ވެބްސައިޓުން ޑައުންލޯޑް ކުރި PDF ފައިލްތައް (ފައިލްގެ ނަމަށް ބަދަލު ނުގެނެސް) މިތަނަށް އަޕްލޯޑް ކުރައްވާ. ކޮންމެ ދުވަހަކު ހެނދުނު މި ފައިލްތައް ކިޔައި، ކޮންމެ މައްސަލައެއްގެ ޤާނޫނީ އުސޫލުތައް (20 ލައިނަށްވުރެ ކުރުކޮށް) ޝާއިޢު ކުރެވޭނެ.</p>
+      <div class="form-grid">
+        <div class="full">
+          <label for="inboxFiles">PDF ފައިލްތައް (އެއްފަހަރާ ގިނަ ފައިލް ހޮވިދާނެ)</label>
+          <input id="inboxFiles" type="file" accept="application/pdf" multiple>
+        </div>
+      </div>
+      <p><button class="btn" id="inboxUpload">އަޕްލޯޑް ކުރޭ</button></p>
+      <div class="status" id="inboxStatus"></div>
+      <h2 style="margin-top:24px">ކިޔުމަށް އިންތިޒާރުގައި ހުރި ފައިލްތައް</h2>
+      <div id="inboxList"><p class="hint">ލޯޑުވަނީ…</p></div>
+      <p class="hint" id="inboxDone"></p>
     </section>
 
     <button class="btn secondary" id="logoutBtn">ނުކުމެވޭ</button>
@@ -184,10 +204,69 @@ async function login() {
 
 function drawTabs() {
   $("adminTabs").innerHTML = Object.entries(CATEGORIES).map(([k, c]) =>
-    `<button class="${k === current ? "active" : ""}" data-k="${k}">${c.title}</button>`).join("");
+    `<button class="${k === current ? "active" : ""}" data-k="${k}">${c.title}</button>`).join("") +
+    `<button class="${current === "inbox" ? "active" : ""}" data-k="inbox">⬆ ޖަޖްމަންޓް PDF (އުސޫލު ލިޔުމަށް)</button>`;
   $("adminTabs").querySelectorAll("button").forEach(b => b.onclick = async () => {
-    current = b.dataset.k; drawTabs(); resetForm(); await loadList();
+    current = b.dataset.k; drawTabs();
+    const inbox = current === "inbox";
+    $("catPanels").style.display = inbox ? "none" : "block";
+    $("inboxPanel").style.display = inbox ? "block" : "none";
+    if (inbox) return loadInbox();
+    resetForm(); await loadList();
   });
+}
+
+// ---- Judgment PDF inbox ----
+const pdfName = u => decodeURIComponent(String(u || "").split("/").pop().split("?")[0]).toLowerCase();
+let scIndex = null;
+async function scByFile() {
+  if (!scIndex) {
+    const list = await fetchJson("data/sc-judgments.json");
+    scIndex = new Map(list.filter(j => j.pdf).map(j => [pdfName(j.pdf), j]));
+  }
+  return scIndex;
+}
+
+async function loadInbox() {
+  $("inboxList").innerHTML = `<p class="hint">ލޯޑުވަނީ…</p>`;
+  const idx = await scByFile();
+  let files = [];
+  try { files = (await gh(`/contents/inbox?ref=${REPO.branch}`)).filter(f => /\.pdf$/i.test(f.name)); }
+  catch (e) { if (!String(e.message).includes("Not Found")) { $("inboxList").innerHTML = `<p class="status show err">${esc(e.message)}</p>`; return; } }
+  $("inboxList").innerHTML = files.length ? files.map(f => {
+    const j = idx.get(f.name.toLowerCase());
+    return `<div class="admin-row"><div><strong class="ltr">${esc(f.name)}</strong>
+      <div class="meta">${j ? `<span class="chip">${esc(j.citation || j.caseNo || "")}</span><span>${esc(j.title)}</span>` : `<span>ސުޕްރީމް ކޯޓުގެ ލިސްޓުގައި ނުފެނުނު — PDF ގެ މަޢުލޫމާތުން ބޭނުންކުރެވޭނެ</span>`}</div></div>
+      <div class="actions"><button class="btn small danger" data-rm="${esc(f.path)}" data-sha="${esc(f.sha)}">ފޮހެލާ</button></div></div>`;
+  }).join("") : `<p class="hint">އިންތިޒާރުގައި އެއްވެސް ފައިލެއް ނެތް.</p>`;
+  $("inboxList").querySelectorAll("[data-rm]").forEach(b => b.onclick = async () => {
+    if (!confirm("މި ފައިލް ފޮހެލަން ބޭނުންތޯ؟")) return;
+    try {
+      await gh(`/contents/${b.dataset.rm}`, { method: "DELETE", body: JSON.stringify({ message: `Remove inbox file ${b.dataset.rm}`, sha: b.dataset.sha, branch: REPO.branch }) });
+      loadInbox();
+    } catch (e) { show($("inboxStatus"), e.message, "err"); }
+  });
+  const done = await fetchJson("data/sc-principles.json");
+  $("inboxDone").textContent = `ޤާނޫނީ އުސޫލު ލިޔެވިފައިވާ މައްސަލަތައް: ${done.length}`;
+}
+
+async function uploadInbox() {
+  const files = [...$("inboxFiles").files];
+  if (!files.length) return show($("inboxStatus"), "PDF ފައިލެއް ހޮއްވަވާ", "err");
+  const btn = $("inboxUpload"); btn.disabled = true;
+  let ok = 0; const fails = [];
+  for (const [i, file] of files.entries()) {
+    show($("inboxStatus"), `އަޕްލޯޑް ކުރަނީ (${i + 1}/${files.length}): ${file.name}`, "info");
+    try {
+      if (file.size > 25 * 1024 * 1024) throw new Error("25MB އަށްވުރެ ބޮޑު");
+      const name = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-");
+      await gh(`/contents/inbox/${name}`, { method: "PUT", body: JSON.stringify({ message: `Inbox: ${name}`, branch: REPO.branch, content: await fileToB64(file) }) });
+      ok++;
+    } catch (e) { fails.push(`${file.name}: ${e.message.includes("sha") ? "މި ނަމުގައި ފައިލެއް ކުރީގައި އަޕްލޯޑް ކޮށްފައި" : e.message}`); }
+  }
+  btn.disabled = false; $("inboxFiles").value = "";
+  show($("inboxStatus"), `${ok} ފައިލް އަޕްލޯޑް ކުރެވިއްޖެ.` + (fails.length ? ` ނުކުރެވުނު: ${fails.join("، ")}` : " މާދަމާ ހެނދުނު ޤާނޫނީ އުސޫލުތައް ޝާއިޢު ކުރެވޭނެ."), fails.length ? "err" : "ok");
+  loadInbox();
 }
 
 async function loadList() {
@@ -318,6 +397,7 @@ async function remove(id) {
 }
 
 $("loginBtn").onclick = login;
+$("inboxUpload").onclick = uploadInbox;
 $("token").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
 $("form").addEventListener("submit", save);
 $("resetBtn").onclick = resetForm;
