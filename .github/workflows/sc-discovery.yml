@@ -1,0 +1,34 @@
+name: SC discovery (one-off test)
+on:
+  push:
+    paths: [".github/workflows/sc-discovery.yml"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils >/dev/null
+      - name: Probe
+        run: |
+          mkdir out && cd out
+          UA="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36"
+          curl -sSL -A "$UA" -o list.html -w "list %{http_code}\n" "https://www.supremecourt.mv/case-registry/judgments" >> log.txt 2>&1 || true
+          curl -sSL -A "$UA" -o list2.html -w "list2 %{http_code}\n" "https://www.supremecourt.mv/case-registry/judgments?page=2" >> log.txt 2>&1 || true
+          curl -sSL -A "$UA" -o detail.html -w "detail %{http_code}\n" "https://www.supremecourt.mv/case-registry/judgments/260faed0-251d-493e-837a-561346fcb882" >> log.txt 2>&1 || true
+          curl -sSL -A "$UA" -o a.pdf -w "pdf %{http_code} %{size_download}\n" "https://old.supremecourt.mv/storage/mv/sc-ninmunthah/hukum/2026sc37-2023sca13-aishath-aniya-v-contech-pvt-ltd.pdf" >> log.txt 2>&1 || true
+          file a.pdf >> log.txt || true
+          pdfinfo a.pdf >> log.txt 2>&1 || true
+          pdffonts a.pdf >> log.txt 2>&1 || true
+          pdftotext -layout a.pdf a.txt 2>>log.txt || true
+          grep -oE '/_next/[^"]+\.js|/api/[^"'"'"' ]+' list.html | sort -u | head -50 > assets.txt || true
+          cat log.txt
+      - name: Save to debug branch
+        run: |
+          cd out
+          git init -q -b pipeline-debug
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "discovery output"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" pipeline-debug
