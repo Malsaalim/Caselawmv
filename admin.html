@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="dv" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>އެޑްމިން | ކޭސްލޯ އެމްވީ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thaana:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div id="header"></div>
+<main class="wrap">
+  <div class="page-head">
+    <h1>އެޑްމިން ޕެނަލް</h1>
+    <p>ކޮންމެ ބައެއްގައި އަލަށް ލިޔުން/ނިންމުން އަޕްލޯޑް ކުރުމަށް</p>
+  </div>
+
+  <!-- Login -->
+  <section class="panel" id="loginPanel">
+    <h2>ލޮގިން</h2>
+    <div class="form-grid">
+      <div class="full">
+        <label for="token">GitHub ޓޯކަން (Personal Access Token)</label>
+        <input id="token" type="password" dir="ltr" autocomplete="off" placeholder="github_pat_...">
+        <p class="hint">މި ޓޯކަން ރައްކާވާނީ ހަމައެކަނި ތިބާގެ މި ބްރައުޒަރުގައެވެ. ރިޕޮސިޓަރީ <span class="ltr" id="repoLabel"></span> އަށް ލިޔުމުގެ ހުއްދަ ލިބިފައިވާ ޓޯކަނެއް ބޭނުންކުރައްވާ.</p>
+      </div>
+    </div>
+    <button class="btn" id="loginBtn">ވަދެވޭ</button>
+    <div class="status" id="loginStatus"></div>
+  </section>
+
+  <!-- Dashboard -->
+  <div id="dash" style="display:none">
+    <div class="admin-tabs" id="adminTabs"></div>
+
+    <section class="panel">
+      <h2 id="formTitle">އައު ލިޔުމެއް</h2>
+      <form id="form" class="form-grid">
+        <div class="full">
+          <label for="f-title">ސުރުޚީ *</label>
+          <input id="f-title" required>
+        </div>
+        <div>
+          <label for="f-court">ކޯޓު</label>
+          <input id="f-court" list="courtList" placeholder="ސުޕްރީމް ކޯޓު">
+          <datalist id="courtList">
+            <option>ސުޕްރީމް ކޯޓު</option>
+            <option>ހައިކޯޓު</option>
+            <option>ކްރިމިނަލް ކޯޓު</option>
+            <option>ސިވިލް ކޯޓު</option>
+            <option>ފެމިލީ ކޯޓު</option>
+            <option>ޖުވެނައިލް ކޯޓު</option>
+            <option>ޑްރަގް ކޯޓު</option>
+            <option>އެމްޕްލޯއިމަންޓް ޓްރައިބިއުނަލް</option>
+          </datalist>
+        </div>
+        <div>
+          <label for="f-case">މައްސަލަ ނަންބަރު</label>
+          <input id="f-case" dir="ltr" placeholder="2026/SC-A/01">
+        </div>
+        <div>
+          <label for="f-date">ތާރީޚު</label>
+          <input id="f-date" type="date" dir="ltr">
+        </div>
+        <div>
+          <label for="f-pdf">PDF ލިޔުން (އިޚްތިޔާރީ)</label>
+          <input id="f-pdf" type="file" accept="application/pdf">
+          <p class="hint" id="pdfCurrent"></p>
+        </div>
+        <div class="full">
+          <label for="f-summary">ޚުލާޞާ</label>
+          <textarea id="f-summary" style="min-height:90px"></textarea>
+        </div>
+        <div class="full">
+          <label for="f-body">ފުރިހަމަ ތަފްޞީލު</label>
+          <textarea id="f-body" style="min-height:260px"></textarea>
+          <p class="hint">ޕެރެގްރާފް ވަކިކުރުމަށް ހުސް ލައިނެއް ދޫކޮށްލައްވާ.</p>
+        </div>
+        <div class="full" style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" type="submit" id="saveBtn">ޝާއިޢު ކުރޭ</button>
+          <button class="btn secondary" type="button" id="resetBtn">އައު ލިޔުމެއް ފަށާ</button>
+        </div>
+      </form>
+      <div class="status" id="status"></div>
+    </section>
+
+    <section class="panel">
+      <h2>ޝާއިޢު ކޮށްފައިވާ ލިޔުންތައް</h2>
+      <div id="adminList"></div>
+    </section>
+
+    <button class="btn secondary" id="logoutBtn">ނުކުމެވޭ</button>
+    <div style="height:48px"></div>
+  </div>
+</main>
+<div id="footer"></div>
+
+<script src="assets/app.js"></script>
+<script>
+renderChrome("admin");
+
+// Repo settings: auto-detect from GitHub Pages URL, fall back to defaults.
+const REPO = (() => {
+  const m = location.hostname.match(/^([^.]+)\.github\.io$/i);
+  const owner = m ? m[1] : "Malsaalim";
+  const seg = location.pathname.split("/").filter(Boolean)[0];
+  const repo = m && seg && !seg.endsWith(".html") ? seg : "Caselawmv";
+  return { owner, repo, branch: "main" };
+})();
+document.getElementById("repoLabel").textContent = `${REPO.owner}/${REPO.repo}`;
+
+const API = `https://api.github.com/repos/${REPO.owner}/${REPO.repo}`;
+let token = "";
+try { token = localStorage.getItem("caselaw_token") || ""; } catch {}
+let current = "higher";
+let items = [];
+let sha = null;
+let editingId = null;
+
+const $ = id => document.getElementById(id);
+
+function show(el, msg, kind) {
+  el.className = `status show ${kind}`;
+  el.textContent = msg;
+}
+
+function b64EncodeUtf8(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+function b64DecodeUtf8(b64) {
+  const bin = atob(b64.replace(/\n/g, ""));
+  return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
+}
+function fileToB64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(String(r.result).split(",")[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+async function gh(path, opts = {}) {
+  const res = await fetch(`${API}${path}`, {
+    ...opts,
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Accept": "application/vnd.github+json",
+      ...(opts.body ? { "Content-Type": "application/json" } : {})
+    }
+  });
+  if (!res.ok) {
+    let msg = res.status;
+    try { msg = (await res.json()).message || msg; } catch {}
+    throw new Error(`GitHub: ${msg}`);
+  }
+  return res.status === 204 ? null : res.json();
+}
+
+async function login() {
+  const btn = $("loginBtn");
+  token = $("token").value.trim() || token;
+  if (!token) return show($("loginStatus"), "ޓޯކަން ލިޔުއްވާ", "err");
+  btn.disabled = true;
+  try {
+    const repo = await gh("");
+    if (!repo.permissions || !repo.permissions.push) throw new Error("މި ޓޯކަނަށް ރިޕޮސިޓަރީއަށް ލިޔުމުގެ ހުއްދައެއް ނެތް");
+    try { localStorage.setItem("caselaw_token", token); } catch {}
+    REPO.branch = repo.default_branch || "main";
+    $("loginPanel").style.display = "none";
+    $("dash").style.display = "block";
+    drawTabs();
+    await loadList();
+  } catch (e) {
+    show($("loginStatus"), `ލޮގިން ނުވެވުނު: ${e.message}`, "err");
+    token = "";
+  } finally { btn.disabled = false; }
+}
+
+function drawTabs() {
+  $("adminTabs").innerHTML = Object.entries(CATEGORIES).map(([k, c]) =>
+    `<button class="${k === current ? "active" : ""}" data-k="${k}">${c.title}</button>`).join("");
+  $("adminTabs").querySelectorAll("button").forEach(b => b.onclick = async () => {
+    current = b.dataset.k; drawTabs(); resetForm(); await loadList();
+  });
+}
+
+async function loadList() {
+  $("adminList").innerHTML = `<p class="hint">ލޯޑުވަނީ…</p>`;
+  try {
+    const f = await gh(`/contents/${CATEGORIES[current].file}?ref=${REPO.branch}`);
+    sha = f.sha;
+    items = JSON.parse(b64DecodeUtf8(f.content) || "[]");
+  } catch (e) {
+    if (String(e.message).includes("Not Found")) { sha = null; items = []; }
+    else { $("adminList").innerHTML = `<p class="status show err">${esc(e.message)}</p>`; return; }
+  }
+  drawList();
+}
+
+function drawList() {
+  const sorted = [...items].sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  $("adminList").innerHTML = sorted.length ? sorted.map(e => `
+    <div class="admin-row">
+      <div>
+        <strong>${esc(e.title)}</strong>
+        <div class="meta">${e.court ? `<span>${esc(e.court)}</span>` : ""}${e.date ? `<span>${fmtDate(e.date)}</span>` : ""}</div>
+      </div>
+      <div class="actions">
+        <a class="btn small secondary" href="view.html?cat=${current}&id=${encodeURIComponent(e.id)}" target="_blank">ބަލާ</a>
+        <button class="btn small secondary" data-edit="${esc(e.id)}">ބަދަލު ގެނަސް</button>
+        <button class="btn small danger" data-del="${esc(e.id)}">ފޮހެލާ</button>
+      </div>
+    </div>`).join("") : `<p class="hint">މި ބައިގައި އަދި އެއްވެސް ލިޔުމެއް ނެތް.</p>`;
+  $("adminList").querySelectorAll("[data-edit]").forEach(b => b.onclick = () => startEdit(b.dataset.edit));
+  $("adminList").querySelectorAll("[data-del]").forEach(b => b.onclick = () => remove(b.dataset.del));
+}
+
+function startEdit(id) {
+  const e = items.find(i => String(i.id) === id);
+  if (!e) return;
+  editingId = id;
+  $("formTitle").textContent = "ލިޔުމަށް ބަދަލު ގެނައުން";
+  $("f-title").value = e.title || "";
+  $("f-court").value = e.court || "";
+  $("f-case").value = e.caseNo || "";
+  $("f-date").value = e.date || "";
+  $("f-summary").value = e.summary || "";
+  $("f-body").value = e.body || "";
+  $("f-pdf").value = "";
+  $("pdfCurrent").textContent = e.pdf ? `މިހާރުގެ PDF: ${e.pdf.split("/").pop()}` : "";
+  $("saveBtn").textContent = "ބަދަލު ރައްކާ ކުރޭ";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function resetForm() {
+  editingId = null;
+  $("form").reset();
+  $("pdfCurrent").textContent = "";
+  $("formTitle").textContent = "އައު ލިޔުމެއް";
+  $("saveBtn").textContent = "ޝާއިޢު ކުރޭ";
+}
+
+async function writeData(message) {
+  const body = { message, branch: REPO.branch, content: b64EncodeUtf8(JSON.stringify(items, null, 2) + "\n") };
+  if (sha) body.sha = sha;
+  const r = await gh(`/contents/${CATEGORIES[current].file}`, { method: "PUT", body: JSON.stringify(body) });
+  sha = r.content.sha;
+}
+
+async function save(ev) {
+  ev.preventDefault();
+  const btn = $("saveBtn");
+  btn.disabled = true;
+  show($("status"), "ރައްކާ ކުރަނީ…", "info");
+  try {
+    await loadList(); // fetch latest so concurrent edits are not lost
+    const id = editingId || `${Date.now().toString(36)}`;
+    const existing = items.find(i => String(i.id) === id) || {};
+    const entry = {
+      ...existing,
+      id,
+      title: $("f-title").value.trim(),
+      court: $("f-court").value.trim(),
+      caseNo: $("f-case").value.trim(),
+      date: $("f-date").value,
+      summary: $("f-summary").value.trim(),
+      body: $("f-body").value.trim()
+    };
+    const file = $("f-pdf").files[0];
+    if (file) {
+      if (file.size > 25 * 1024 * 1024) throw new Error("PDF ފައިލް 25MB އަށްވުރެ ބޮޑު");
+      const safe = (file.name.replace(/\.pdf$/i, "").replace(/[^A-Za-z0-9_-]+/g, "-").replace(/^-+|-+$/g, "") || "document").slice(0, 60);
+      const path = `uploads/${current}/${id}-${safe}.pdf`;
+      show($("status"), "PDF އަޕްލޯޑް ކުރަނީ…", "info");
+      await gh(`/contents/${path}`, {
+        method: "PUT",
+        body: JSON.stringify({ message: `Upload PDF: ${entry.title}`, branch: REPO.branch, content: await fileToB64(file) })
+      });
+      entry.pdf = path;
+    }
+    const idx = items.findIndex(i => String(i.id) === id);
+    if (idx >= 0) items[idx] = entry; else items.push(entry);
+    await writeData(`${editingId ? "Update" : "Add"} (${current}): ${entry.title}`);
+    show($("status"), "ރައްކާ ކުރެވިއްޖެ. ވެބްސައިޓުގައި ފެންނާނީ 1-2 މިނެޓު ތެރޭގައި.", "ok");
+    resetForm();
+    drawList();
+  } catch (e) {
+    show($("status"), `ރައްކާ ނުކުރެވުނު: ${e.message}`, "err");
+  } finally { btn.disabled = false; }
+}
+
+async function remove(id) {
+  const e = items.find(i => String(i.id) === id);
+  if (!e || !confirm(`"${e.title}" ފޮހެލަން ބޭނުންތޯ؟`)) return;
+  show($("status"), "ފޮހެލަނީ…", "info");
+  try {
+    await loadList();
+    items = items.filter(i => String(i.id) !== id);
+    await writeData(`Delete (${current}): ${e.title}`);
+    if (e.pdf) {
+      try {
+        const f = await gh(`/contents/${e.pdf}?ref=${REPO.branch}`);
+        await gh(`/contents/${e.pdf}`, { method: "DELETE", body: JSON.stringify({ message: `Delete PDF: ${e.title}`, sha: f.sha, branch: REPO.branch }) });
+      } catch {}
+    }
+    if (editingId === id) resetForm();
+    drawList();
+    show($("status"), "ފޮހެލެވިއްޖެ.", "ok");
+  } catch (err) {
+    show($("status"), `ފޮހެލެވޭކަށް ނެތް: ${err.message}`, "err");
+  }
+}
+
+$("loginBtn").onclick = login;
+$("token").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+$("form").addEventListener("submit", save);
+$("resetBtn").onclick = resetForm;
+$("logoutBtn").onclick = () => {
+  try { localStorage.removeItem("caselaw_token"); } catch {}
+  location.reload();
+};
+if (token) login();
+</script>
+</body>
+</html>
