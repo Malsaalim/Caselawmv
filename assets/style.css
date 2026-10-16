@@ -182,3 +182,18 @@ label { display: block; font-size: 14px; color: var(--ink-soft); margin-bottom: 
   .nav { width: 100%; }
 }
 input[dir="ltr"] { direction: ltr; text-align: left; }
+
+/* Transparent law-books background (all pages) */
+body { position: relative; isolation: isolate; min-height: 100vh; }
+body::before {
+  content: "";
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: url("law-books.svg") center bottom / cover no-repeat;
+  opacity: .13;
+}
+.site-header { position: relative; z-index: 1; }
+.tab-card, .entry, .article, .panel { background: rgba(255, 255, 255, .94); backdrop-filter: blur(2px); }
+.empty { background: rgba(247, 244, 238, .7); }
+@media (max-width: 640px) {
+  body::before { opacity: .11; }
+}
