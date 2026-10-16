@@ -4,21 +4,26 @@ const CATEGORIES = {
     title: "މަތީ މަރުޙަލާގެ ކޯޓުތަކުގެ ނިންމުންތައް",
     desc: "ސުޕްރީމް ކޯޓާއި ހައިކޯޓުން ނިންމާފައިވާ މުހިންމު މައްސަލަތައް",
     page: "higher-courts.html",
-    file: "data/higher.json"
+    file: "data/higher.json",
+    sync: { file: "data/sc-judgments.json" }
   },
   recent: {
     title: "ފަހުގެ ނިންމުންތައް",
     desc: "ކޯޓުތަކުން އެންމެ ފަހުން ނިންމާފައިވާ ނިންމުންތައް",
     page: "recent.html",
-    file: "data/recent.json"
+    file: "data/recent.json",
+    sync: { file: "data/sc-judgments.json", limit: 30 }
   },
   principles: {
     title: "ޤާނޫނީ އުސޫލުތައް",
     desc: "ކޯޓުތަކުގެ ނިންމުންތަކުން ކަނޑައެޅިފައިވާ ޤާނޫނީ އުސޫލުތަކާއި ލިޔުންތައް",
     page: "principles.html",
-    file: "data/principles.json"
+    file: "data/principles.json",
+    sync: { file: "data/sc-principles.json" }
   }
 };
+
+const SC_REGISTRY = "https://www.supremecourt.mv/case-registry/judgments";
 
 const MONTHS = ["ޖަނަވަރީ", "ފެބުރުއަރީ", "މާރިޗު", "އޭޕްރީލު", "މެއި", "ޖޫން",
   "ޖުލައި", "އޯގަސްޓު", "ސެޕްޓެމްބަރު", "އޮކްޓޫބަރު", "ނޮވެމްބަރު", "ޑިސެމްބަރު"];
@@ -38,11 +43,32 @@ function paragraphs(text) {
   return String(text || "").split(/\n\s*\n/).map(p => `<p>${esc(p).replace(/\n/g, "<br>")}</p>`).join("");
 }
 
+async function fetchJson(file) {
+  try {
+    const res = await fetch(`${file}?v=${Date.now()}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch { return []; }
+}
+
+const byDate = (a, b) => (b.date || "").localeCompare(a.date || "") || (b.citation || "").localeCompare(a.citation || "");
+
+function normalizeSynced(e) {
+  const out = { ...e, source: "sc" };
+  if (!out.caseNo && /SC-/.test(out.title || "")) out.caseNo = out.title;
+  if (!out.title || out.title === out.caseNo) out.title = `ޤަޟިއްޔާ ނަންބަރު ${out.caseNo || ""}`.trim();
+  return out;
+}
+
 async function loadCategory(key) {
-  const res = await fetch(`${CATEGORIES[key].file}?v=${Date.now()}`);
-  if (!res.ok) return [];
-  const data = await res.json();
-  return (Array.isArray(data) ? data : []).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  const cat = CATEGORIES[key];
+  const own = (await fetchJson(cat.file)).sort(byDate);
+  if (!cat.sync) return own;
+  let synced = (await fetchJson(cat.sync.file)).map(normalizeSynced).sort(byDate);
+  if (cat.sync.limit) synced = synced.slice(0, cat.sync.limit);
+  const ownIds = new Set(own.map(e => String(e.id)));
+  return [...own, ...synced.filter(e => !ownIds.has(String(e.id)))].sort(byDate);
 }
 
 function renderChrome(active) {
@@ -61,13 +87,18 @@ function renderChrome(active) {
   document.getElementById("footer").innerHTML = `
     <footer class="site-footer"><div class="wrap">
       <span>© ${new Date().getFullYear()} ކޭސްލޯ އެމްވީ</span>
-      <a href="admin.html">އެޑްމިން</a>
+      <span style="display:flex;gap:16px;flex-wrap:wrap">
+        <a href="${SC_REGISTRY}" target="_blank" rel="noopener">ސުޕްރީމް ކޯޓުގެ ނިންމުންތައް ↗</a>
+        <a href="admin.html">އެޑްމިން</a>
+      </span>
     </div></footer>`;
 }
 
 function entryCard(key, e) {
   const meta = [
     e.court ? `<span class="chip">${esc(e.court)}</span>` : "",
+    e.citation ? `<span class="ltr">${esc(e.citation)}</span>` : "",
+    e.category ? `<span>${esc(e.category)}</span>` : "",
     e.caseNo ? `<span>މައްސަލަ ނަންބަރު: <span class="ltr">${esc(e.caseNo)}</span></span>` : "",
     e.date ? `<span>${fmtDate(e.date)}</span>` : ""
   ].join("");
@@ -100,13 +131,21 @@ async function initListPage(key) {
     const c = courtSel.value;
     const shown = items.filter(i =>
       (!c || i.court === c) &&
-      (!q || [i.title, i.summary, i.caseNo, i.court, i.body].join(" ").toLowerCase().includes(q)));
-    listEl.innerHTML = shown.length
-      ? shown.map(e => entryCard(key, e)).join("")
-      : `<div class="empty">${items.length ? "ހޯދި އެއްޗެއް ނުފެނުނު" : "އަދި އެއްވެސް ލިޔުމެއް ޝާއިޢު ކޮށްފައެއް ނުވޭ"}</div>`;
+      (!q || [i.title, i.titleEn, i.citation, i.summary, i.caseNo, i.court, i.category, i.body].join(" ").toLowerCase().includes(q)));
+    if (!shown.length) {
+      listEl.innerHTML = `<div class="empty">${items.length ? "ހޯދި އެއްޗެއް ނުފެނުނު" : "އަދި އެއްވެސް ލިޔުމެއް ޝާއިޢު ކޮށްފައެއް ނުވޭ"}</div>`;
+      return;
+    }
+    const page = shown.slice(0, limit);
+    listEl.innerHTML = `<p class="hint">ޖުމްލަ ${shown.length} ލިޔުން</p>` + page.map(e => entryCard(key, e)).join("") +
+      (shown.length > limit ? `<button class="btn secondary" id="more" style="justify-self:center">އިތުރަށް ދައްކާ</button>` : "");
+    const more = document.getElementById("more");
+    if (more) more.onclick = () => { limit += PAGE; draw(); };
   }
-  search.addEventListener("input", draw);
-  courtSel.addEventListener("change", draw);
+  const PAGE = 30;
+  let limit = PAGE;
+  search.addEventListener("input", () => { limit = PAGE; draw(); });
+  courtSel.addEventListener("change", () => { limit = PAGE; draw(); });
   draw();
 }
 
@@ -128,12 +167,19 @@ async function initViewPage() {
     <h1>${esc(e.title)}</h1>
     <div class="meta">
       ${e.court ? `<span class="chip">${esc(e.court)}</span>` : ""}
+      ${e.citation ? `<span class="ltr">${esc(e.citation)}</span>` : ""}
       ${e.caseNo ? `<span>މައްސަލަ ނަންބަރު: <span class="ltr">${esc(e.caseNo)}</span></span>` : ""}
+      ${e.category ? `<span>${esc(e.category)}</span>` : ""}
       ${e.date ? `<span>${fmtDate(e.date)}</span>` : ""}
     </div>
+    ${e.titleEn ? `<p class="ltr" style="display:block;color:var(--muted);margin:8px 0 0">${esc(e.titleEn)}</p>` : ""}
     ${e.summary ? `<div class="summary">${esc(e.summary)}</div>` : ""}
-    <div class="body">${paragraphs(e.body)}</div>
-    ${e.pdf ? `<p><a class="btn" href="${esc(e.pdf)}" target="_blank" rel="noopener">ނިންމުމުގެ ފުރިހަމަ ލިޔުން (PDF)</a></p>` : ""}
+    ${e.body ? `<div class="body">${paragraphs(e.body)}</div>` :
+      (e.source === "sc" && key !== "principles" ? `<p class="hint" style="margin-top:20px">މި ނިންމުމުގެ ފުރިހަމަ ލިޔުން ސުޕްރީމް ކޯޓުގެ ވެބްސައިޓުން ކިޔުއްވޭނެ.</p>` : "")}
+    <p style="display:flex;gap:8px;flex-wrap:wrap;margin-top:20px">
+      ${e.pdf ? `<a class="btn" href="${esc(e.pdf)}" target="_blank" rel="noopener">ނިންމުމުގެ ފުރިހަމަ ލިޔުން (PDF)</a>` : ""}
+      ${e.url ? `<a class="btn secondary" href="${esc(e.url)}" target="_blank" rel="noopener">ސުޕްރީމް ކޯޓުގެ ވެބްސައިޓުގައި ބަލާ ↗</a>` : ""}
+    </p>
   </article>`;
 }
 
