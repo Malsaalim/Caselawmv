@@ -40,6 +40,10 @@ publish them, and clear the inbox.
       entry's `subject`. A Civil Court decision is not an appeal, so `facts` ends with the Civil Court's decision.
    2. **Read the whole judgment.** Try `pdftotext -layout`. If the Thaana text comes out empty, garbled
       or in a legacy (non-Unicode) font, render pages with `pdftoppm -r 110 -png` and read the page images.
+      **Scanned PDFs** (no text layer — all Civil Court decisions; `pdffonts` lists no fonts): render at
+      `pdftoppm -r 200 -png`, cut each page into top and bottom halves, and read the images yourself, page by page.
+      Do not use OCR tools (Tesseract and similar garble this italic Thaana). If a word is genuinely illegible, leave
+      it out rather than guess; skip the decision only if its holding cannot be read.
       Read every page — the holding is usually near the end.
    3. **Write the entry in Dhivehi (Thaana script)**, in three parts:
       - `facts`: a short summary of the case, court by court. Paragraphs are separated by a blank line; a paragraph

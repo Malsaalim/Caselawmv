@@ -1,0 +1,46 @@
+name: Notify new legal principles
+# Opens (and closes) an issue mentioning the site owner whenever new legal-principles entries are pushed,
+# so GitHub emails them a list of the new cases with their page links.
+on:
+  push:
+    branches: [main]
+    paths: ["data/sc-principles.json"]
+permissions:
+  contents: read
+  issues: write
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: List new entries
+        id: diff
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess
+          def load(rev):
+              try:
+                  return json.loads(subprocess.run(["git", "show", f"{rev}:data/sc-principles.json"], capture_output=True, check=True).stdout)
+              except Exception:
+                  return []
+          before = {str(e["id"]) for e in load(os.environ["BEFORE"])}
+          # No previous version (e.g. a force-push or new history): don't announce every entry.
+          new = [e for e in load("HEAD") if str(e["id"]) not in before] if before else []
+          site = "https://malsaalim.github.io/Caselawmv/view.html?cat=principles&id="
+          lines = [f"- **{e.get('court', '')}** {e.get('citation') or e.get('caseNo', '')} — {e.get('title', '')}  \n  {e.get('titleEn', '')}  \n  {site}{e['id']}" for e in new]
+          body = "@Malsaalim New legal principles were published on CaseLaw MV:\n\n" + "\n".join(lines)
+          open("body.md", "w").write(body)
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"count={len(new)}\n")
+          print(body)
+          PY
+      - name: Open and close the notification issue
+        if: steps.diff.outputs.count != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          url=$(gh issue create --repo "$GITHUB_REPOSITORY" --title "New legal principles: ${{ steps.diff.outputs.count }} case(s) ($(date -u +%F))" --body-file body.md)
+          gh issue close "$url" --repo "$GITHUB_REPOSITORY"
