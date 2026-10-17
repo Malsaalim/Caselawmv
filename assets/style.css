@@ -132,6 +132,7 @@ textarea { min-height: 120px; line-height: 1.9; resize: vertical; }
 }
 .article .body p { margin: 0 0 1em; }
 .article h2 { font-size: 20px; color: var(--brand-2); margin: 28px 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--accent-soft); }
+.article .body h3 { font-size: 16px; color: var(--brand); margin: 18px 0 6px; }
 .article .points { margin: 0 0 1em; padding-inline-start: 1.6em; }
 .article .points li { margin-bottom: .6em; }
 .article .precedent { border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; margin: 12px 0; }

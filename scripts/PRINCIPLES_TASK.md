@@ -18,14 +18,21 @@ Your job each run: turn every PDF in the inbox into a legal-principles entry, pu
       or in a legacy (non-Unicode) font, render pages with `pdftoppm -r 110 -png` and read the page images.
       Read every page — the holding is usually near the end.
    3. **Write the entry in Dhivehi (Thaana script)**, in three parts:
-      - `facts`: a short account of the facts (2–3 short paragraphs separated by a blank line): who the
-        parties are, what happened between them, what each lower court decided and what was appealed.
-        Only what is needed to understand the principles.
-      - `body`: the legal principles as points, one per line, numbered (`1. …`), **no more than 20 lines**.
-        Each line states a rule of law, interpretation, standard or test that the Court laid down or applied
-        (ratio decidendi), naming the Article / Act / section where the judgment does
-        (e.g. ޤާނޫނުއަސާސީގެ 42 ވަނަ މާއްދާ). No narrative facts here. The last line may state the outcome
-        (e.g. އިސްތިއުނާފު ބާޠިލުކުރެވުނު / ޤަބޫލުކުރެވުނު).
+      - `facts`: a short summary of the case, court by court. Paragraphs are separated by a blank line; a paragraph
+        starting with `### ` is a sub-heading; a paragraph of numbered lines (`1. …`) shows as a list. In order:
+        1. `### މައްސަލައިގެ ޙަޤީޤަތްތައް`: who the parties are and what happened between them (short).
+        2. One sub-heading per lower court, with its case number (e.g. `### ސިވިލް ކޯޓު (2293/Cv-C/2017)`):
+           magistrate, Civil, Criminal, Family, Juvenile, Drug court or tribunal: what was claimed/charged and what it decided.
+        3. `### ހައިކޯޓު (<case no>)` if the High Court heard it: who appealed, the grounds of appeal and the
+           High Court's decision on them. If the judgment does not set out the High Court grounds, say so; do not guess.
+        4. `### ސުޕްރީމް ކޯޓު (<case no>)` if this is a Supreme Court decision: each ground of appeal as a numbered
+           point followed by the Court's decision on that ground, then a closing line with the bench and the result.
+        If the case was not an appeal, stop at the court that decided it.
+      - `body`: the legal principles the judges relied on to decide the case, as points, one per line, numbered
+        (`1. …`), **no more than 20 lines**. Include the principles the Court laid down or applied (ratio decidendi),
+        naming the Article / Act / section where the judgment does (e.g. ޤާނޫނުއަސާސީގެ 42 ވަނަ މާއްދާ), **and** the
+        principles taken from binding decisions of higher courts that the judges relied on, naming each case and its
+        number in the point (e.g. `… ޢަބްދުލް މަޖީދު ވ. މާލޭ ސިޓީ ކައުންސިލް (2015/SC-A/08) ގެ މަތިން …`). No facts here.
       - `precedents`: every earlier court decision the judgment cites (main text and footnotes), one object each:
         `name` (case name as the judgment gives it), `citation` (e.g. `[2021] SC 51`, or `""`), `caseNo`
         (e.g. `2016/SC-A/16`), `court`, `parties` (both parties as named; if the judgment names only one, say so;
