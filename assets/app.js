@@ -165,7 +165,7 @@ function entryCard(key, e) {
   return `<article class="entry">
     <h3><a href="view.html?cat=${key}&id=${encodeURIComponent(e.id)}">${esc(e.title)}</a></h3>
     <div class="meta">${meta}</div>
-    ${e.summary ? `<p>${esc(e.summary)}</p>` : ""}
+    ${e.summary ? `<p>${ltrRuns(esc(e.summary))}</p>` : ""}
   </article>`;
 }
 
@@ -277,7 +277,7 @@ async function initViewPage() {
     ${key === "principles" && e.body ? `<p class="no-print" style="margin:16px 0 0;display:flex;flex-direction:column;align-items:flex-start;gap:8px">
       <button class="btn" id="docxBtn" type="button">⬇ Download the word file</button>
       <button class="btn" id="pdfBtn" type="button">⬇ Download the pdf file</button></p>` : ""}
-    ${e.summary ? `<div class="summary">${esc(e.summary)}</div>` : ""}
+    ${e.summary ? `<div class="summary">${ltrRuns(esc(e.summary))}</div>` : ""}
     ${e.facts ? `<h2>މައްސަލައިގެ ޚުލާޞާ</h2><div class="body">${paragraphs(e.facts)}</div>` : ""}
     ${e.body ? `<div class="body">${e.facts ? "<h2>ޤާނޫނީ އުސޫލުތައް</h2><p class=\"hint\">ނިންމުމަށް ފަނޑިޔާރުން ބިނާކުރެއްވި ޤާނޫނީ އުސޫލުތަކާއި މަތީ ކޯޓުތަކުގެ ޤަޟިއްޔާތައް</p>" : ""}${points(e.body)}</div>${precedentsHtml(e.precedents)}` :
       (e.source === "sc" && key !== "principles" ? `<p class="hint" style="margin-top:20px">މި ނިންމުމުގެ ފުރިހަމަ ލިޔުން ސުޕްރީމް ކޯޓުގެ ވެބްސައިޓުން ކިޔުއްވޭނެ.</p>` : "")}
