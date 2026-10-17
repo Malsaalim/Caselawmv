@@ -33,6 +33,14 @@ Your job each run: turn every PDF in the inbox into a legal-principles entry, pu
         naming the Article / Act / section where the judgment does (e.g. ޤާނޫނުއަސާސީގެ 42 ވަނަ މާއްދާ), **and** the
         principles taken from binding decisions of higher courts that the judges relied on, naming each case and its
         number in the point (e.g. `… ޢަބްދުލް މަޖީދު ވ. މާލޭ ސިޓީ ކައުންސިލް (2015/SC-A/08) ގެ މަތިން …`). No facts here.
+      - **Language.** Write in correct, formal written Dhivehi (ލިޔުމުގެ ބަސް), in the same style as the uploaded report.
+        Wherever the report already states a fact, a ground of appeal, a lower court's reasoning or a principle, reuse the
+        report's own sentence (shortened only by dropping clauses), rather than paraphrasing it in your own words.
+        Use the report's own terms and spellings for names, places, dates, months, amounts and legal terms
+        (e.g. ޑރ. އަލަކާ ސިންގް, އިންޑިޔާ, ތަންފީޒު / ތަންފީޛު as the report has it, 400،000 އެމެރިކާ ޑޮލަރު, ''…'' quotation marks).
+        Every sentence must be complete and grammatical, ending with the proper ending (…އެވެ / …ނެވެ / …ކަމަށެވެ);
+        no fragments, no "X: Y" shorthand. Lists that mirror the report's lists end each item with `؛` and the last with
+        `؛ މިއެވެ.` as the report does. Use `،` as the comma. Re-read every sentence against the page images before saving.
       - **Cite every court decision exactly as the uploaded report writes it** — Supreme Court, High Court or any
         other court, and the case under appeal itself — in `facts`, `body` and `precedents`: copy the report's own
         wording of the case name and its number/citation (main text and footnote), character for character.
