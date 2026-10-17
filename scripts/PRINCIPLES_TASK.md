@@ -1,13 +1,14 @@
 # Daily task: legal principles from uploaded Supreme Court judgments
 
 Repository: https://github.com/Malsaalim/Caselawmv (branch `main`).
-Judgment PDFs are uploaded by the site owner through the admin panel into `inbox/`.
-Your job each run: turn every PDF in `inbox/` into a legal-principles entry, publish it, and clear the inbox.
+Judgment PDFs are uploaded by the site owner through the admin panel into the Supabase Storage bucket `inbox`.
+The environment must provide `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; never print or commit the key.
+Your job each run: turn every PDF in the inbox into a legal-principles entry, publish it, and clear the inbox.
 
 ## Steps
 
 1. Clone the repo (shallow is fine) and set the commit identity to `Claude <noreply@anthropic.com>`.
-2. List `inbox/*.pdf`. If there are none, stop: report "nothing to process" and make no commit.
+2. Run `python scripts/supabase_inbox.py download /tmp/inbox` to fetch the waiting PDFs. If there are none, stop: report "nothing to process" and make no commit.
 3. For each PDF:
    1. **Match it to a judgment.** Compare the file name (lower-case) with the last path segment of `pdf`
       in `data/sc-judgments.json`. A match gives you `id`, `citation`, `caseNo`, `title`, `titleEn`,
@@ -47,8 +48,9 @@ Your job each run: turn every PDF in `inbox/` into a legal-principles entry, pub
        "processed": "<YYYY-MM-DD>"
       }
       ```
-   5. Remove the PDF from `inbox/` (`git rm`). If a PDF truly cannot be read, move it to `inbox/failed/`
-      instead and say why in the commit message.
+   5. After the commit in step 5 is pushed, remove the PDF from the inbox with
+      `python scripts/supabase_inbox.py remove <name>`. If a PDF truly cannot be read, run
+      `python scripts/supabase_inbox.py fail <name>` instead and say why in the commit message.
 4. Validate: `data/sc-principles.json` parses as JSON, and every `body` has at most 20 lines.
 5. Commit once ("Add legal principles: <citations>"), `git pull --rebase origin main`, push to `main`.
 6. Report which cases were published and any failures.
