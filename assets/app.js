@@ -140,7 +140,7 @@ function renderChrome(active) {
     <header class="site-header"><div class="wrap">
       <a class="logo" href="index.html">
         <span class="logo-mark">ޤ</span>
-        <span class="logo-text"><strong>ކޭސްލޯ އެމްވީ</strong><small>ދިވެހިރާއްޖޭގެ ކޯޓުތަކުގެ ނިންމުންތައް</small></span>
+        <span class="logo-text"><strong class="brand-name" dir="ltr">CaseLaw MV</strong><small>ދިވެހިރާއްޖޭގެ ކޯޓުތަކުގެ ނިންމުންތައް</small></span>
       </a>
       <nav class="nav">
         <a href="index.html" class="${active === "home" ? "active" : ""}">މައި ޞަފްޙާ</a>${nav}
@@ -148,7 +148,7 @@ function renderChrome(active) {
     </div></header>`;
   document.getElementById("footer").innerHTML = `
     <footer class="site-footer"><div class="wrap">
-      <span>© ${new Date().getFullYear()} ކޭސްލޯ އެމްވީ</span>
+      <span dir="ltr">© ${new Date().getFullYear()} CaseLaw MV</span>
       <span style="display:flex;gap:16px;flex-wrap:wrap">
         <a href="${SC_REGISTRY}" target="_blank" rel="noopener">ސުޕްރީމް ކޯޓުގެ ނިންމުންތައް ↗</a>
         <a href="admin.html">އެޑްމިން</a>
@@ -185,7 +185,7 @@ const courtTabOf = e => (COURT_TABS.find(t => t.key === e.courtTab || t.match.te
 async function initListPage(key) {
   renderChrome(key);
   const cat = CATEGORIES[key];
-  document.title = `${cat.title} | ކޭސްލޯ އެމްވީ`;
+  document.title = `${cat.title} | CaseLaw MV`;
   document.getElementById("title").textContent = cat.title;
   document.getElementById("desc").textContent = cat.desc;
   const listEl = document.getElementById("list");
@@ -260,7 +260,7 @@ async function initViewPage() {
   const e = items.find(i => String(i.id) === id);
   if (e && key === "principles" && courtTabOf(e)) document.getElementById("back").href = `${cat.page}?court=${courtTabOf(e)}`;
   if (!e) { root.innerHTML = `<div class="empty">މި ލިޔުން ނުފެނުނު</div>`; return; }
-  document.title = `${e.title} | ކޭސްލޯ އެމްވީ`;
+  document.title = `${e.title} | CaseLaw MV`;
   let principlesLink = "";
   if (key !== "principles" && e.source === "sc") {
     const pr = (await fetchJson("data/sc-principles.json")).find(p => String(p.id) === String(e.id));
@@ -372,7 +372,7 @@ async function downloadDocx(e) {
       if (p.principles) children.push(para("ކަނޑައަޅާފައިވާ ޤާނޫނީ އުސޫލުތައް:", { bold: true, after: 60 }), ...lines(p.principles).map(l => para(l, { indent: 360 })));
     }
   }
-  children.push(para(`ކޭސްލޯ އެމްވީ — ${location.href}`, { size: 18, color: "7B8496", align: AlignmentType.CENTER }));
+  children.push(para(`CaseLaw MV — ${location.href}`, { size: 18, color: "7B8496", align: AlignmentType.CENTER }));
 
   const doc = new Document({
     creator: "CaseLaw MV", title: e.title,
