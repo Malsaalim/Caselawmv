@@ -238,7 +238,7 @@ async function initViewPage() {
       ${e.date ? `<span>${fmtDate(e.date)}</span>` : ""}
     </div>
     ${e.titleEn ? `<p class="ltr" style="display:block;color:var(--muted);margin:8px 0 0">${esc(e.titleEn)}</p>` : ""}
-    ${key === "principles" && e.body ? `<p class="no-print" style="margin:16px 0 0;display:flex;gap:8px;flex-wrap:wrap">
+    ${key === "principles" && e.body ? `<p class="no-print" style="margin:16px 0 0;display:flex;flex-direction:column;align-items:flex-start;gap:8px">
       <button class="btn" id="docxBtn" type="button">⬇ Download the word file</button>
       <button class="btn" id="pdfBtn" type="button">⬇ Download the pdf file</button></p>` : ""}
     ${e.summary ? `<div class="summary">${esc(e.summary)}</div>` : ""}
