@@ -178,6 +178,9 @@ label { display: block; font-size: 14px; color: var(--ink-soft); margin-bottom: 
   border: 1px solid var(--line); background: #fff; padding: 8px 16px; border-radius: 999px; cursor: pointer;
 }
 .admin-tabs button.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+.court-tabs button { font-family: inherit; font-size: 15px; }
+.court-tabs .count { display: inline-block; min-width: 1.6em; margin-inline-start: 4px; padding: 0 6px; border-radius: 999px;
+  background: var(--accent-soft); color: var(--ink); font-size: 13px; text-align: center; }
 .admin-row {
   display: flex; justify-content: space-between; align-items: center; gap: 12px;
   border-bottom: 1px solid var(--line); padding: 10px 0;

@@ -169,6 +169,16 @@ function entryCard(key, e) {
   </article>`;
 }
 
+// Sub-tabs of the legal-principles section, chosen from each entry's court.
+const COURT_TABS = [
+  { key: "supreme", label: "Supreme Court Decisions", match: /ސުޕްރީމް/ },
+  { key: "high", label: "High Court Decisions", match: /ހައިކޯޓު/ },
+  { key: "criminal", label: "Criminal Court Decisions", match: /ކްރިމިނަލް/ },
+  { key: "civil", label: "Civil Court Decisions", match: /ސިވިލް/ },
+  { key: "family", label: "Family Court Decisions", match: /ފެމިލީ/ },
+];
+const courtTabOf = e => (COURT_TABS.find(t => t.key === e.courtTab || t.match.test(e.court || "")) || {}).key;
+
 async function initListPage(key) {
   renderChrome(key);
   const cat = CATEGORIES[key];
@@ -186,14 +196,38 @@ async function initListPage(key) {
     courts.map(c => `<option>${esc(c)}</option>`).join("");
   if (!courts.length) courtSel.style.display = "none";
 
+  // Legal principles: one tab per court instead of the court drop-down.
+  let tab = null;
+  if (key === "principles") {
+    courtSel.style.display = "none";
+    const params = new URLSearchParams(location.search);
+    tab = COURT_TABS.some(t => t.key === params.get("court")) ? params.get("court") : "supreme";
+    const tabsEl = document.createElement("div");
+    tabsEl.className = "admin-tabs court-tabs";
+    document.querySelector(".toolbar").before(tabsEl);
+    const drawTabs = () => {
+      tabsEl.innerHTML = COURT_TABS.map(t => {
+        const n = items.filter(i => courtTabOf(i) === t.key).length;
+        return `<button type="button" class="${t.key === tab ? "active" : ""}" data-k="${t.key}">${t.label} <span class="count">${n}</span></button>`;
+      }).join("");
+      tabsEl.querySelectorAll("button").forEach(b => b.onclick = () => {
+        tab = b.dataset.k; limit = PAGE; drawTabs(); draw();
+        params.set("court", tab); history.replaceState(null, "", `?${params}`);
+      });
+    };
+    drawTabs();
+  }
+
   function draw() {
     const q = search.value.trim().toLowerCase();
     const c = courtSel.value;
     const shown = items.filter(i =>
+      (!tab || courtTabOf(i) === tab) &&
       (!c || i.court === c) &&
       (!q || [i.title, i.titleEn, i.citation, i.summary, i.caseNo, i.court, i.category, i.body, i.facts].join(" ").toLowerCase().includes(q)));
     if (!shown.length) {
-      listEl.innerHTML = `<div class="empty">${items.length ? "ހޯދި އެއްޗެއް ނުފެނުނު" : "އަދި އެއްވެސް ލިޔުމެއް ޝާއިޢު ކޮށްފައެއް ނުވޭ"}</div>`;
+      const tabEmpty = tab && !q && !items.some(i => courtTabOf(i) === tab);
+      listEl.innerHTML = `<div class="empty">${tabEmpty ? "މި ބައިގައި އަދި އެއްވެސް ލިޔުމެއް ޝާއިޢު ކޮށްފައެއް ނުވޭ" : items.length ? "ހޯދި އެއްޗެއް ނުފެނުނު" : "އަދި އެއްވެސް ލިޔުމެއް ޝާއިޢު ކޮށްފައެއް ނުވޭ"}</div>`;
       return;
     }
     const page = shown.slice(0, limit);
@@ -221,6 +255,7 @@ async function initViewPage() {
   document.getElementById("back").textContent = `→ ${cat.title}`;
   const items = await loadCategory(key).catch(() => []);
   const e = items.find(i => String(i.id) === id);
+  if (e && key === "principles" && courtTabOf(e)) document.getElementById("back").href = `${cat.page}?court=${courtTabOf(e)}`;
   if (!e) { root.innerHTML = `<div class="empty">މި ލިޔުން ނުފެނުނު</div>`; return; }
   document.title = `${e.title} | ކޭސްލޯ އެމްވީ`;
   let principlesLink = "";
