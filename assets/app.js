@@ -90,7 +90,8 @@ function precedentsHtml(list) {
 }
 
 // Keep case numbers (2019/SC-L/87) and citations ([2021] SC 51) left-to-right inside Thaana text.
-const ltrRuns = html => html.replace(/\[\d{4}\]\s+[A-Z]+\s+\d+|\d{4}\/[A-Za-z][A-Za-z-]*\/\d+/g, m => `<bdi dir="ltr">${m}</bdi>`);
+const CASE_NO = /\[\d{4}\]\s+[A-Z]+\s+\d+|[0-9A-Za-z]+(?:[-\/()][0-9A-Za-z]+)*\/(?:[0-9A-Za-z()]+[-\/]?)+/g;
+const ltrRuns = html => html.replace(CASE_NO, m => `<bdi dir="ltr">${m}</bdi>`);
 
 // Paragraphs; a paragraph starting with "### " is a sub-heading, one made of numbered lines is a list.
 function paragraphs(text) {
@@ -275,13 +276,13 @@ async function downloadDocx(e) {
   const latin = { ascii: "Calibri", hAnsi: "Calibri", cs: "Calibri" };
   // Thaana goes in right-to-left Faruma runs; citations, case numbers, numbers and English in left-to-right
   // Calibri runs (Faruma draws [ ] and Latin as other glyphs).
-  const LTR = /(\[\d{4}\]\s+[A-Z]+\s+\d+|\d{4}\/[A-Za-z][A-Za-z-]*\/\d+|[A-Za-z][A-Za-z0-9 .,'’()&:\/-]*[A-Za-z0-9.)]|[A-Za-z]|\d[\d,.\/-]*\d|\d)/;
+  const LTR = /(\[\d{4}\]\s+[A-Z]+\s+\d+|[0-9A-Za-z]+(?:[-\/()][0-9A-Za-z]+)*\/(?:[0-9A-Za-z()]+[-\/]?)+|[A-Za-z][A-Za-z0-9 .,'’()&:\/-]*[A-Za-z0-9.)]|[A-Za-z]|\d[\d,.\/-]*\d|\d)/;
   const runs = (text, o = {}) => String(text).split(LTR).filter(Boolean).map((t, i) => {
     const ltr = LTR.test(t) && !/[\u0780-\u07BF]/.test(t);
     return new TextRun({ text: ltr ? `\u200E${t}\u200E` : t, font: ltr ? latin : font, rightToLeft: !ltr, size: o.size || 26, sizeComplexScript: o.size || 26,
       bold: o.bold, boldComplexScript: o.bold, color: o.color });
   });
-  const para = (text, o = {}) => new Paragraph({ bidirectional: true, alignment: o.align || AlignmentType.BOTH,
+  const para = (text, o = {}) => new Paragraph({ bidirectional: /[\u0780-\u07BF]/.test(text), alignment: o.align || AlignmentType.BOTH,
     spacing: { after: o.after ?? 120, line: 340 }, indent: o.indent ? { right: o.indent } : undefined,
     heading: o.heading, children: runs(text, o) });
   const heading = (text, size = 32) => para(text, { bold: true, size, color: "0E2E49", after: 160, heading: HeadingLevel.HEADING_2 });
