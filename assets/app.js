@@ -34,7 +34,7 @@ const sb = (() => {
 
 const fromRow = r => ({
   id: r.id, title: r.title, titleEn: r.title_en, court: r.court, caseNo: r.case_no, citation: r.citation,
-  date: r.date, summary: r.summary, body: r.body, pdf: r.pdf, url: r.url
+  date: r.date, summary: r.summary, body: r.body, pdf: r.pdf, url: r.url, added: r.created_at
 });
 const toRow = (category, e) => ({
   id: e.id, category, title: e.title, title_en: e.titleEn || null, court: e.court || null, case_no: e.caseNo || null,
@@ -113,6 +113,8 @@ async function fetchJson(file) {
 }
 
 const byDate = (a, b) => (b.date || "").localeCompare(a.date || "") || (b.citation || "").localeCompare(a.citation || "");
+// Legal principles: the most recently written entry first.
+const byAdded = (a, b) => (b.added || "").localeCompare(a.added || "") || byDate(a, b);
 
 function normalizeSynced(e) {
   const out = { ...e, source: "sc" };
@@ -128,7 +130,7 @@ async function loadCategory(key) {
   let synced = (await fetchJson(cat.sync.file)).map(normalizeSynced).sort(byDate);
   if (cat.sync.limit) synced = synced.slice(0, cat.sync.limit);
   const ownIds = new Set(own.map(e => String(e.id)));
-  return [...own, ...synced.filter(e => !ownIds.has(String(e.id)))].sort(byDate);
+  return [...own, ...synced.filter(e => !ownIds.has(String(e.id)))].sort(key === "principles" ? byAdded : byDate);
 }
 
 function renderChrome(active) {

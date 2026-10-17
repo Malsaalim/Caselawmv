@@ -60,7 +60,8 @@ Your job each run: turn every PDF in the inbox into a legal-principles entry, pu
       - Never invent a fact, principle, article number, case number, party or holding. If part of the text is
         unreadable, or the judgment does not say something (e.g. the other party's name), write only what you can verify.
    4. **Add the entry** to `data/sc-principles.json` (a JSON array; keep UTF-8, `ensure_ascii=False`,
-      indent 1). Replace any existing entry with the same `id`. Shape:
+      indent 1). Insert it at the top of the array, and replace any existing entry with the same `id`.
+      The site lists legal principles newest-first by `added` (the UTC time the entry was written). Shape:
 
       ```json
       {
@@ -80,7 +81,8 @@ Your job each run: turn every PDF in the inbox into a legal-principles entry, pu
        "precedents": [
         {"name": "…", "reference": "…", "citation": "…", "caseNo": "…", "court": "…", "parties": "…", "principles": "1. …\n2. …"}
        ],
-       "processed": "<YYYY-MM-DD>"
+       "processed": "<YYYY-MM-DD>",
+       "added": "<YYYY-MM-DDTHH:MM:SSZ, current UTC time>"
       }
       ```
    5. After the commit in step 5 is pushed, remove the PDF from the inbox with
