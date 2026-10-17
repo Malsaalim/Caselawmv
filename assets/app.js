@@ -75,7 +75,7 @@ function points(text) {
 
 function precedentsHtml(list) {
   if (!Array.isArray(list) || !list.length) return "";
-  return `<h2>މި ނިންމުމުގައި ހަވާލާދީފައިވާ ސާބިޤާތައް</h2>` + list.map(p => `
+  return `<h2>މި ނިންމުމުގައި ހަވާލާދީފައިވާ ޤަޟިއްޔާތައް</h2>` + list.map(p => `
     <section class="precedent">
       <h3>${ltrRuns(esc(p.name))}</h3>
       <div class="meta">
@@ -243,7 +243,7 @@ async function initViewPage() {
       <button class="btn" id="pdfBtn" type="button">⬇ Download the pdf file</button></p>` : ""}
     ${e.summary ? `<div class="summary">${esc(e.summary)}</div>` : ""}
     ${e.facts ? `<h2>މައްސަލައިގެ ޚުލާޞާ</h2><div class="body">${paragraphs(e.facts)}</div>` : ""}
-    ${e.body ? `<div class="body">${e.facts ? "<h2>ޤާނޫނީ އުސޫލުތައް</h2><p class=\"hint\">ނިންމުމަށް ފަނޑިޔާރުން ބިނާކުރެއްވި ޤާނޫނީ އުސޫލުތަކާއި މަތީ ކޯޓުތަކުގެ ސާބިޤާތައް</p>" : ""}${points(e.body)}</div>${precedentsHtml(e.precedents)}` :
+    ${e.body ? `<div class="body">${e.facts ? "<h2>ޤާނޫނީ އުސޫލުތައް</h2><p class=\"hint\">ނިންމުމަށް ފަނޑިޔާރުން ބިނާކުރެއްވި ޤާނޫނީ އުސޫލުތަކާއި މަތީ ކޯޓުތަކުގެ ޤަޟިއްޔާތައް</p>" : ""}${points(e.body)}</div>${precedentsHtml(e.precedents)}` :
       (e.source === "sc" && key !== "principles" ? `<p class="hint" style="margin-top:20px">މި ނިންމުމުގެ ފުރިހަމަ ލިޔުން ސުޕްރީމް ކޯޓުގެ ވެބްސައިޓުން ކިޔުއްވޭނެ.</p>` : "")}
     <p class="no-print" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:20px">
       ${principlesLink}
@@ -325,7 +325,7 @@ async function downloadDocx(e) {
   if (e.facts) children.push(heading("މައްސަލައިގެ ޚުލާޞާ"), ...block(e.facts));
   children.push(heading("ޤާނޫނީ އުސޫލުތައް"), ...lines(e.body).map(l => para(l, { indent: 360 })));
   if (Array.isArray(e.precedents) && e.precedents.length) {
-    children.push(heading("މި ނިންމުމުގައި ހަވާލާދީފައިވާ ސާބިޤާތައް"));
+    children.push(heading("މި ނިންމުމުގައި ހަވާލާދީފައިވާ ޤަޟިއްޔާތައް"));
     for (const p of e.precedents) {
       children.push(sub(p.name));
       const ref = p.reference || [p.citation, p.caseNo].filter(Boolean).join(" ");
