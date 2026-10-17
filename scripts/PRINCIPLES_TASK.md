@@ -18,9 +18,16 @@ publish them, and clear the inbox.
    1. **Inbox.** Run `python scripts/supabase_inbox.py download /tmp/inbox`. If `SUPABASE_URL` or
       `SUPABASE_SERVICE_ROLE_KEY` is missing, skip the inbox, say so in the report, and carry on.
    2. **Civil Court.** From `data/civil-judgments.json` take the entries with `"eligible": true` whose `id` is not yet in
-      `data/sc-principles.json`, newest first, **at most 10 per run** (the rest wait for the next run). Download each
-      `pdf` with `curl -sSL -o /tmp/civil/<id>.pdf "<pdf>"` and check the file starts with `%PDF`.
+      `data/sc-principles.json`, newest first. Download each `pdf` with `curl -sSL -o /tmp/civil/<id>.pdf "<pdf>"` and
+      check the file starts with `%PDF`.
    If there is nothing in either, stop: report "nothing to process" and make no commit.
+
+   **Priority.** Supreme Court and High Court judgments come first, always:
+   - Process every inbox PDF before any Civil Court decision, in this order: Supreme Court judgments, then High Court
+     judgments, then any other inbox PDF. Never leave a Supreme Court or High Court judgment for a later run to make
+     room for Civil Court work.
+   - Civil Court decisions only fill what is left of the run: at most `10 − (number of inbox PDFs processed)`, and none
+     when 10 or more inbox PDFs were processed. The rest wait for the next run.
 3. For each PDF:
    1. **Match it to a judgment.** Compare the file name (lower-case) with the last path segment of `pdf`
       in `data/sc-judgments.json`. A match gives you `id`, `citation`, `caseNo`, `title`, `titleEn`,
