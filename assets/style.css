@@ -224,4 +224,6 @@ body::before {
   .article h2, .article .body h3 { break-after: avoid; }
   .article .points li { break-inside: avoid; }
   a { color: inherit; }
+  /* Justified text in the downloaded PDF (the Word export is justified too). */
+  .article .summary, .article .body p, .article .points li, .article .precedent p { text-align: justify; text-justify: inter-word; }
 }
