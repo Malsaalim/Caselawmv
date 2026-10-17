@@ -176,6 +176,7 @@ const COURT_TABS = [
   { key: "criminal", label: "Criminal Court Decisions", match: /ކްރިމިނަލް/ },
   { key: "civil", label: "Civil Court Decisions", match: /ސިވިލް/ },
   { key: "family", label: "Family Court Decisions", match: /ފެމިލީ/ },
+  { key: "juvenile", label: "Juvenile Court Decisions", match: /ޖުވެނައިލް/ },
 ];
 const courtTabOf = e => (COURT_TABS.find(t => t.key === e.courtTab || t.match.test(e.court || "")) || {}).key;
 
