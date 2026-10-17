@@ -66,8 +66,33 @@ function fmtDate(iso) {
   return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
+// Numbered lines ("1. …") become a list; anything else becomes paragraphs.
+function points(text) {
+  const lines = String(text || "").split("\n").map(l => l.trim()).filter(Boolean);
+  if (!lines.length || !lines.every(l => /^\d+[.)]\s/.test(l))) return paragraphs(text);
+  return `<ol class="points">${lines.map(l => `<li>${ltrRuns(esc(l.replace(/^\d+[.)]\s+/, "")))}</li>`).join("")}</ol>`;
+}
+
+function precedentsHtml(list) {
+  if (!Array.isArray(list) || !list.length) return "";
+  return `<h2>މި ނިންމުމުގައި ހަވާލާދީފައިވާ ސާބިޤާތައް</h2>` + list.map(p => `
+    <section class="precedent">
+      <h3>${esc(p.name)}</h3>
+      <div class="meta">
+        ${p.citation ? `<span class="ltr">${esc(p.citation)}</span>` : ""}
+        ${p.caseNo ? `<span>ޤަޟިއްޔާ ނަންބަރު: <span class="ltr">${esc(p.caseNo)}</span></span>` : ""}
+        ${p.court ? `<span class="chip">${esc(p.court)}</span>` : ""}
+      </div>
+      ${p.parties ? `<p><strong>ފަރާތްތައް:</strong> ${esc(p.parties)}</p>` : ""}
+      ${p.principles ? `<p><strong>ކަނޑައަޅާފައިވާ ޤާނޫނީ އުސޫލުތައް:</strong></p>${points(p.principles)}` : ""}
+    </section>`).join("");
+}
+
+// Keep case numbers such as 2019/SC-L/87 left-to-right inside Thaana text.
+const ltrRuns = html => html.replace(/\d{4}\/[A-Za-z][A-Za-z-]*\/\d+/g, m => `<bdi dir="ltr">${m}</bdi>`);
+
 function paragraphs(text) {
-  return String(text || "").split(/\n\s*\n/).map(p => `<p>${esc(p).replace(/\n/g, "<br>")}</p>`).join("");
+  return String(text || "").split(/\n\s*\n/).map(p => `<p>${ltrRuns(esc(p)).replace(/\n/g, "<br>")}</p>`).join("");
 }
 
 async function fetchJson(file) {
@@ -158,7 +183,7 @@ async function initListPage(key) {
     const c = courtSel.value;
     const shown = items.filter(i =>
       (!c || i.court === c) &&
-      (!q || [i.title, i.titleEn, i.citation, i.summary, i.caseNo, i.court, i.category, i.body].join(" ").toLowerCase().includes(q)));
+      (!q || [i.title, i.titleEn, i.citation, i.summary, i.caseNo, i.court, i.category, i.body, i.facts].join(" ").toLowerCase().includes(q)));
     if (!shown.length) {
       listEl.innerHTML = `<div class="empty">${items.length ? "ހޯދި އެއްޗެއް ނުފެނުނު" : "އަދި އެއްވެސް ލިޔުމެއް ޝާއިޢު ކޮށްފައެއް ނުވޭ"}</div>`;
       return;
@@ -206,7 +231,8 @@ async function initViewPage() {
     </div>
     ${e.titleEn ? `<p class="ltr" style="display:block;color:var(--muted);margin:8px 0 0">${esc(e.titleEn)}</p>` : ""}
     ${e.summary ? `<div class="summary">${esc(e.summary)}</div>` : ""}
-    ${e.body ? `<div class="body">${paragraphs(e.body)}</div>` :
+    ${e.facts ? `<h2>ކަންހިނގާފައިވާ ގޮތް</h2><div class="body">${paragraphs(e.facts)}</div>` : ""}
+    ${e.body ? `<div class="body">${e.facts ? "<h2>ޤާނޫނީ އުސޫލުތައް</h2>" : ""}${points(e.body)}</div>${precedentsHtml(e.precedents)}` :
       (e.source === "sc" && key !== "principles" ? `<p class="hint" style="margin-top:20px">މި ނިންމުމުގެ ފުރިހަމަ ލިޔުން ސުޕްރީމް ކޯޓުގެ ވެބްސައިޓުން ކިޔުއްވޭނެ.</p>` : "")}
     <p style="display:flex;gap:8px;flex-wrap:wrap;margin-top:20px">
       ${principlesLink}

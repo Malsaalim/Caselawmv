@@ -17,17 +17,24 @@ Your job each run: turn every PDF in the inbox into a legal-principles entry, pu
    2. **Read the whole judgment.** Try `pdftotext -layout`. If the Thaana text comes out empty, garbled
       or in a legacy (non-Unicode) font, render pages with `pdftoppm -r 110 -png` and read the page images.
       Read every page — the holding is usually near the end.
-   3. **Write the legal principles in Dhivehi (Thaana script)**:
-      - `body`: the legal principles only, as numbered lines (`1. …`), **no more than 20 lines in total**.
+   3. **Write the entry in Dhivehi (Thaana script)**, in three parts:
+      - `facts`: a short account of the facts (2–3 short paragraphs separated by a blank line): who the
+        parties are, what happened between them, what each lower court decided and what was appealed.
+        Only what is needed to understand the principles.
+      - `body`: the legal principles as points, one per line, numbered (`1. …`), **no more than 20 lines**.
         Each line states a rule of law, interpretation, standard or test that the Court laid down or applied
         (ratio decidendi), naming the Article / Act / section where the judgment does
-        (e.g. ޤާނޫނުއަސާސީގެ 42 ވަނަ މާއްދާ).
-      - Leave out narrative facts, party histories, procedural history and names unless a principle cannot
-        be understood without them. No quotations longer than a short phrase.
-      - The last line may state the outcome briefly (e.g. އިސްތިއުނާފު ބާޠިލުކުރެވުނު / ޤަބޫލުކުރެވުނު).
+        (e.g. ޤާނޫނުއަސާސީގެ 42 ވަނަ މާއްދާ). No narrative facts here. The last line may state the outcome
+        (e.g. އިސްތިއުނާފު ބާޠިލުކުރެވުނު / ޤަބޫލުކުރެވުނު).
+      - `precedents`: every earlier court decision the judgment cites (main text and footnotes), one object each:
+        `name` (case name as the judgment gives it), `citation` (e.g. `[2021] SC 51`, or `""`), `caseNo`
+        (e.g. `2016/SC-A/16`), `court`, `parties` (both parties as named; if the judgment names only one, say so;
+        note when the case was cited by a party rather than the Court), and `principles`: the principles that
+        case decided, **as stated in this judgment**, numbered one per line. Use `[]` if no case is cited.
+        Statutes, books, fatwa bodies and foreign restatements are not precedents; mention them in `body` if relevant.
       - `summary`: one sentence giving the core holding.
-      - Never invent a principle, article number or holding. If part of the text is unreadable, write only
-        what you can verify.
+      - Never invent a fact, principle, article number, case number, party or holding. If part of the text is
+        unreadable, or the judgment does not say something (e.g. the other party's name), write only what you can verify.
    4. **Add the entry** to `data/sc-principles.json` (a JSON array; keep UTF-8, `ensure_ascii=False`,
       indent 1). Replace any existing entry with the same `id`. Shape:
 
@@ -44,13 +51,18 @@ Your job each run: turn every PDF in the inbox into a legal-principles entry, pu
        "url": "<official judgment page>",
        "pdf": "<official PDF URL>",
        "summary": "<one Dhivehi sentence>",
+       "facts": "<paragraph>\n\n<paragraph>",
        "body": "1. …\n2. …",
+       "precedents": [
+        {"name": "…", "citation": "…", "caseNo": "…", "court": "…", "parties": "…", "principles": "1. …\n2. …"}
+       ],
        "processed": "<YYYY-MM-DD>"
       }
       ```
    5. After the commit in step 5 is pushed, remove the PDF from the inbox with
       `python scripts/supabase_inbox.py remove <name>`. If a PDF truly cannot be read, run
       `python scripts/supabase_inbox.py fail <name>` instead and say why in the commit message.
-4. Validate: `data/sc-principles.json` parses as JSON, and every `body` has at most 20 lines.
+4. Validate: `data/sc-principles.json` parses as JSON, every `body` has at most 20 lines and every line of it
+   starts with a number, and every entry has `facts` and a `precedents` list.
 5. Commit once ("Add legal principles: <citations>"), `git pull --rebase origin main`, push to `main`.
 6. Report which cases were published and any failures.
