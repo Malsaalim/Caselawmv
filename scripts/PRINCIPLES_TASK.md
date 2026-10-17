@@ -1,7 +1,9 @@
 # Daily task: legal principles from uploaded Supreme Court judgments
 
 Repository: https://github.com/Malsaalim/Caselawmv (branch `main`).
-Judgment PDFs are uploaded by the site owner through the admin panel into the Supabase Storage bucket `inbox`.
+Judgment PDFs are uploaded by the site owner through the admin panel into the Supabase Storage bucket `inbox`, and new Supreme Court judgments
+are sent there automatically by `tools/court-fetcher/fetch_sc.py`, which runs on the owner's computer at 05:15 (the court's
+PDF server blocks cloud servers). Those files keep the court's own PDF file name, so step 3.1 matches them to `data/sc-judgments.json`.
 The environment must provide `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; never print or commit the key.
 Your job each run: turn every PDF in the inbox into a legal-principles entry, publish it, and clear the inbox.
 

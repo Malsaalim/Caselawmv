@@ -1,0 +1,6 @@
+config.json
+sent.json
+fetch_sc.log
+browser-profile/
+.venv/
+launchd.log

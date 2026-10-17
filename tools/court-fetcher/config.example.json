@@ -1,0 +1,6 @@
+{
+ "email": "your-admin-email@example.com",
+ "password": "your-admin-password",
+ "start_date": "2026-10-01",
+ "max_per_run": 5
+}
