@@ -77,10 +77,11 @@ function precedentsHtml(list) {
   if (!Array.isArray(list) || !list.length) return "";
   return `<h2>މި ނިންމުމުގައި ހަވާލާދީފައިވާ ސާބިޤާތައް</h2>` + list.map(p => `
     <section class="precedent">
-      <h3>${esc(p.name)}</h3>
+      <h3>${ltrRuns(esc(p.name))}</h3>
       <div class="meta">
+        ${p.reference ? `<span>${ltrRuns(esc(p.reference))}</span>` : `
         ${p.citation ? `<span class="ltr">${esc(p.citation)}</span>` : ""}
-        ${p.caseNo ? `<span>ޤަޟިއްޔާ ނަންބަރު: <span class="ltr">${esc(p.caseNo)}</span></span>` : ""}
+        ${p.caseNo ? `<span>ޤަޟިއްޔާ ނަންބަރު: <span class="ltr">${esc(p.caseNo)}</span></span>` : ""}`}
         ${p.court ? `<span class="chip">${esc(p.court)}</span>` : ""}
       </div>
       ${p.parties ? `<p><strong>ފަރާތްތައް:</strong> ${esc(p.parties)}</p>` : ""}
@@ -88,8 +89,8 @@ function precedentsHtml(list) {
     </section>`).join("");
 }
 
-// Keep case numbers such as 2019/SC-L/87 left-to-right inside Thaana text.
-const ltrRuns = html => html.replace(/\d{4}\/[A-Za-z][A-Za-z-]*\/\d+/g, m => `<bdi dir="ltr">${m}</bdi>`);
+// Keep case numbers (2019/SC-L/87) and citations ([2021] SC 51) left-to-right inside Thaana text.
+const ltrRuns = html => html.replace(/\[\d{4}\]\s+[A-Z]+\s+\d+|\d{4}\/[A-Za-z][A-Za-z-]*\/\d+/g, m => `<bdi dir="ltr">${m}</bdi>`);
 
 // Paragraphs; a paragraph starting with "### " is a sub-heading, one made of numbered lines is a list.
 function paragraphs(text) {

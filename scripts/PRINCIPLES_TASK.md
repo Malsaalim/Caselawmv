@@ -33,8 +33,17 @@ Your job each run: turn every PDF in the inbox into a legal-principles entry, pu
         naming the Article / Act / section where the judgment does (e.g. ޤާނޫނުއަސާސީގެ 42 ވަނަ މާއްދާ), **and** the
         principles taken from binding decisions of higher courts that the judges relied on, naming each case and its
         number in the point (e.g. `… ޢަބްދުލް މަޖީދު ވ. މާލޭ ސިޓީ ކައުންސިލް (2015/SC-A/08) ގެ މަތިން …`). No facts here.
+      - **Cite every court decision exactly as the uploaded report writes it** — Supreme Court, High Court or any
+        other court, and the case under appeal itself — in `facts`, `body` and `precedents`: copy the report's own
+        wording of the case name and its number/citation (main text and footnote), character for character.
+        Do not shorten, translate, re-order or re-format it. For example, if the report says
+        `ސުޕްރީމް ކޯޓުން ނިންމާފައިވާ ޢަބްދުލް މަޖީދު ވ. މާލޭ ސިޓީ ކައުންސިލް ޤަޟިއްޔާ` with the footnote
+        `ސުޕްރީމް ކޯޓުގެ ނަންބަރު 2015/SC-A/08 ޤަޟިއްޔާ`, write exactly that; court sub-headings in `facts` likewise
+        (e.g. `### ސިވިލް ކޯޓުގެ ނަންބަރު 2293/Cv-C/2017 ޤަޟިއްޔާ`). Laws are cited the same way
+        (e.g. `ޤާނޫނު ނަންބަރު 4/91 (ކޮންޓްރެކްޓާބެހޭ ޤާނޫނު)`). Check spellings against the page images.
       - `precedents`: every earlier court decision the judgment cites (main text and footnotes), one object each:
-        `name` (case name as the judgment gives it), `citation` (e.g. `[2021] SC 51`, or `""`), `caseNo`
+        `name` (the case name exactly as the report's text gives it), `reference` (the case number/citation exactly
+        as the report's footnote or text gives it), `citation` (e.g. `[2021] SC 51`, or `""`), `caseNo`
         (e.g. `2016/SC-A/16`), `court`, `parties` (both parties as named; if the judgment names only one, say so;
         note when the case was cited by a party rather than the Court), and `principles`: the principles that
         case decided, **as stated in this judgment**, numbered one per line. Use `[]` if no case is cited.
@@ -61,7 +70,7 @@ Your job each run: turn every PDF in the inbox into a legal-principles entry, pu
        "facts": "<paragraph>\n\n<paragraph>",
        "body": "1. …\n2. …",
        "precedents": [
-        {"name": "…", "citation": "…", "caseNo": "…", "court": "…", "parties": "…", "principles": "1. …\n2. …"}
+        {"name": "…", "reference": "…", "citation": "…", "caseNo": "…", "court": "…", "parties": "…", "principles": "1. …\n2. …"}
        ],
        "processed": "<YYYY-MM-DD>"
       }

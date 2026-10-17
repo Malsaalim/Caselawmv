@@ -1,3 +1,12 @@
+/* Faruma (Office of the President, 2002) for Thaana; everything else falls back to Noto Sans Thaana. */
+@font-face {
+  font-family: "Faruma";
+  src: local("Faruma"), url("fonts/faruma.woff2") format("woff2"), url("fonts/faruma.woff") format("woff");
+  font-display: swap;
+  /* Thaana letters and Arabic-script punctuation only: Faruma maps [ ] . and Latin to other glyphs. */
+  unicode-range: U+0780-07BF, U+060C, U+061B, U+061F, U+FDF2;
+}
+
 :root {
   --ink: #1d2433;
   --ink-soft: #4a5468;
@@ -18,11 +27,11 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; }
 body {
-  font-family: "Noto Sans Thaana", "MV Faseyha", "Faruma", system-ui, sans-serif;
+  font-family: "Faruma", "Noto Sans Thaana", system-ui, sans-serif;
   background: var(--paper);
   color: var(--ink);
   line-height: 1.9;
-  font-size: 17px;
+  font-size: 18px;
   direction: rtl;
   text-align: right;
 }
