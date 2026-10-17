@@ -1,0 +1,32 @@
+name: Sync Civil Court decisions
+on:
+  schedule:
+    - cron: "31 23 * * *"   # every day ~04:31 Maldives time
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["scripts/sync_civil.py", ".github/workflows/sync-civil-court.yml"]
+permissions:
+  contents: write
+concurrency:
+  group: civil-sync
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -q requests
+      - name: Fetch decision list
+        run: python scripts/sync_civil.py
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/civil-judgments.json
+          if git diff --cached --quiet; then echo "No new decisions"; exit 0; fi
+          git commit -m "Sync Civil Court decisions ($(date -u +%F))"
+          git pull --rebase -q origin main
+          git push origin HEAD:main

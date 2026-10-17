@@ -1,21 +1,36 @@
-# Daily task: legal principles from uploaded Supreme Court judgments
+# Daily task: legal principles from court judgments
 
 Repository: https://github.com/Malsaalim/Caselawmv (branch `main`).
 Judgment PDFs are uploaded by the site owner through the admin panel into the Supabase Storage bucket `inbox`, and new Supreme Court judgments
 are sent there automatically by `tools/court-fetcher/fetch_sc.py`, which runs on the owner's computer at 05:15 (the court's
 PDF server blocks cloud servers). Those files keep the court's own PDF file name, so step 3.1 matches them to `data/sc-judgments.json`.
-The environment must provide `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; never print or commit the key.
-Your job each run: turn every PDF in the inbox into a legal-principles entry, publish it, and clear the inbox.
+New Civil Court decisions are listed daily in `data/civil-judgments.json` by `scripts/sync_civil.py` (a GitHub Actions
+workflow, 04:31 Maldives time); entries with `"eligible": true` are final judgments that are not routine debt-enforcement,
+banking or hire-purchase claims. Their PDFs download directly from civilcourt.gov.mv.
+The environment must provide `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` for the inbox; never print or commit the key.
+Your job each run: turn every PDF in the inbox, and the waiting Civil Court decisions, into legal-principles entries,
+publish them, and clear the inbox.
 
 ## Steps
 
 1. Clone the repo (shallow is fine) and set the commit identity to `Claude <noreply@anthropic.com>`.
-2. Run `python scripts/supabase_inbox.py download /tmp/inbox` to fetch the waiting PDFs. If there are none, stop: report "nothing to process" and make no commit.
+2. Collect the PDFs to process:
+   1. **Inbox.** Run `python scripts/supabase_inbox.py download /tmp/inbox`. If `SUPABASE_URL` or
+      `SUPABASE_SERVICE_ROLE_KEY` is missing, skip the inbox, say so in the report, and carry on.
+   2. **Civil Court.** From `data/civil-judgments.json` take the entries with `"eligible": true` whose `id` is not yet in
+      `data/sc-principles.json`, newest first, **at most 10 per run** (the rest wait for the next run). Download each
+      `pdf` with `curl -sSL -o /tmp/civil/<id>.pdf "<pdf>"` and check the file starts with `%PDF`.
+   If there is nothing in either, stop: report "nothing to process" and make no commit.
 3. For each PDF:
    1. **Match it to a judgment.** Compare the file name (lower-case) with the last path segment of `pdf`
       in `data/sc-judgments.json`. A match gives you `id`, `citation`, `caseNo`, `title`, `titleEn`,
       `date`, `category`, `url`, `pdf`. If there is no match, take case number, parties and date from the
       PDF itself and use `"id": "upload-<file name without .pdf>"`, `"url": ""`, `"pdf": ""`.
+      **Civil Court files** come with their entry from `data/civil-judgments.json`: use its `id`, `date` and `pdf`;
+      `"court": "ސިވިލް ކޯޓު"` (this puts it in the Civil Court tab); `"citation": ""`; `"url": ""`;
+      `caseNo` exactly as the judgment itself writes it (e.g. `2933/Cv-C/2025`); `title` = the parties as the
+      judgment names them (`<plaintiff> ވ. <defendant>`); `titleEn` = the same in English letters; `category` = the
+      entry's `subject`. A Civil Court decision is not an appeal, so `facts` ends with the Civil Court's decision.
    2. **Read the whole judgment.** Try `pdftotext -layout`. If the Thaana text comes out empty, garbled
       or in a legacy (non-Unicode) font, render pages with `pdftoppm -r 110 -png` and read the page images.
       Read every page — the holding is usually near the end.
@@ -90,7 +105,9 @@ Your job each run: turn every PDF in the inbox into a legal-principles entry, pu
    5. After the commit in step 5 is pushed, remove the PDF from the inbox with
       `python scripts/supabase_inbox.py remove <name>`. If a PDF truly cannot be read, run
       `python scripts/supabase_inbox.py fail <name>` instead and say why in the commit message.
-4. Validate: `data/sc-principles.json` parses as JSON, every `body` has at most 20 lines and every line of it
+      For a Civil Court decision there is nothing to remove; if its PDF truly cannot be read (or is not a judgment),
+      add `"skip": "<reason>"` to its entry in `data/civil-judgments.json` so it is not picked again.
+4. Validate: `data/sc-principles.json` (and `data/civil-judgments.json` if changed) parses as JSON, every `body` has at most 20 lines and every line of it
    starts with a number, and every entry has `facts` and a `precedents` list.
-5. Commit once ("Add legal principles: <citations>"), `git pull --rebase origin main`, push to `main`.
+5. Commit once ("Add legal principles: <citations / case numbers>"), `git pull --rebase origin main`, push to `main`.
 6. Report which cases were published and any failures.
