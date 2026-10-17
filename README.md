@@ -30,3 +30,8 @@ Open `/admin.html` on the site and log in with the admin email and password. Ent
 The "judgment PDF" tab uploads PDFs to the private `inbox` bucket. The daily legal-principles task (`scripts/PRINCIPLES_TASK.md`) reads them with `scripts/supabase_inbox.py`, which needs `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` set in the task's environment.
 
 Anyone can open `admin.html`, but only users listed in `public.admins` can change anything.
+
+## Legal-principles downloads
+Each page in ޤާނޫނީ އުސޫލުތައް has "Download the word file" (built in the browser) and "Download the pdf file".
+The PDFs live in `pdf/principles/` and are rendered by the **Render legal-principles PDFs** workflow
+(`scripts/render_pdfs.cjs`, headless Chromium) whenever `data/sc-principles.json` or the site's assets change.

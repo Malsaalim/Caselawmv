@@ -1,0 +1,33 @@
+name: Render legal-principles PDFs
+on:
+  push:
+    branches: [main]
+    paths: ["data/sc-principles.json", "view.html", "assets/**", "scripts/render_pdfs.cjs", ".github/workflows/principles-pdf.yml"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: principles-pdf
+  cancel-in-progress: true
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.47.2
+          npx playwright install --with-deps chromium
+      - name: Render PDFs
+        run: node scripts/render_pdfs.cjs
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A pdf/principles
+          if git diff --cached --quiet; then echo "PDFs unchanged"; exit 0; fi
+          git commit -m "Render legal-principles PDFs"
+          git pull --rebase -q origin main
+          git push origin HEAD:main

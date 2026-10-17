@@ -238,12 +238,14 @@ async function initViewPage() {
       ${e.date ? `<span>${fmtDate(e.date)}</span>` : ""}
     </div>
     ${e.titleEn ? `<p class="ltr" style="display:block;color:var(--muted);margin:8px 0 0">${esc(e.titleEn)}</p>` : ""}
-    ${key === "principles" && e.body ? `<p style="margin:16px 0 0"><button class="btn" id="docxBtn" type="button">⬇ Download the word file</button></p>` : ""}
+    ${key === "principles" && e.body ? `<p class="no-print" style="margin:16px 0 0;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" id="docxBtn" type="button">⬇ Download the word file</button>
+      <button class="btn" id="pdfBtn" type="button">⬇ Download the pdf file</button></p>` : ""}
     ${e.summary ? `<div class="summary">${esc(e.summary)}</div>` : ""}
     ${e.facts ? `<h2>މައްސަލައިގެ ޚުލާޞާ</h2><div class="body">${paragraphs(e.facts)}</div>` : ""}
     ${e.body ? `<div class="body">${e.facts ? "<h2>ޤާނޫނީ އުސޫލުތައް</h2><p class=\"hint\">ނިންމުމަށް ފަނޑިޔާރުން ބިނާކުރެއްވި ޤާނޫނީ އުސޫލުތަކާއި މަތީ ކޯޓުތަކުގެ ސާބިޤާތައް</p>" : ""}${points(e.body)}</div>${precedentsHtml(e.precedents)}` :
       (e.source === "sc" && key !== "principles" ? `<p class="hint" style="margin-top:20px">މި ނިންމުމުގެ ފުރިހަމަ ލިޔުން ސުޕްރީމް ކޯޓުގެ ވެބްސައިޓުން ކިޔުއްވޭނެ.</p>` : "")}
-    <p style="display:flex;gap:8px;flex-wrap:wrap;margin-top:20px">
+    <p class="no-print" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:20px">
       ${principlesLink}
       ${e.pdf ? `<a class="btn" href="${esc(e.pdf)}" target="_blank" rel="noopener">ނިންމުމުގެ ފުރިހަމަ ލިޔުން (PDF)</a>` : ""}
       ${e.url ? `<a class="btn secondary" href="${esc(e.url)}" target="_blank" rel="noopener">ސުޕްރީމް ކޯޓުގެ ވެބްސައިޓުގައި ބަލާ ↗</a>` : ""}
@@ -257,6 +259,28 @@ async function initViewPage() {
     catch (err) { alert(`Word ފައިލް ތައްޔާރު ނުކުރެވުނު: ${err.message}`); }
     finally { docxBtn.disabled = false; docxBtn.textContent = label; }
   };
+  const pdfBtn = document.getElementById("pdfBtn");
+  if (pdfBtn) pdfBtn.onclick = async () => {
+    pdfBtn.disabled = true;
+    try { await downloadPdf(e); } finally { pdfBtn.disabled = false; }
+  };
+}
+
+// ---- PDF export: files are pre-rendered by scripts/render_pdfs.mjs (GitHub Actions) ----
+const pdfFileName = e => `${(e.citation || e.caseNo || e.id).replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "")}-legal-principles.pdf`;
+
+async function downloadPdf(e) {
+  const url = `pdf/principles/${encodeURIComponent(e.id)}.pdf`;
+  const res = await fetch(`${url}?v=${Date.now()}`).catch(() => null);
+  if (!res || !res.ok) {
+    // Not rendered yet (a just-added case): fall back to the browser's own "Save as PDF".
+    alert("PDF ފައިލް އަދި ތައްޔާރުވެފައެއް ނުވެއެވެ. ޕްރިންޓް ކުރާ ސްކްރީނުން \"Save as PDF\" ހޮއްވަވާ.");
+    window.print();
+    return;
+  }
+  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(await res.blob()), download: pdfFileName(e) });
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 // ---- Word (.docx) export of a legal-principles entry ----

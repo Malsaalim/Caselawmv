@@ -213,3 +213,15 @@ body::before {
 @media (max-width: 640px) {
   body::before { opacity: .11; }
 }
+
+/* Print / PDF: just the article, on white paper. */
+@media print {
+  body { background: #fff; font-size: 13pt; }
+  body::before, #header, #footer, .back, .no-print { display: none !important; }
+  .wrap { max-width: none; padding: 0; }
+  .article { border: 0; box-shadow: none; padding: 0; margin: 0; background: #fff; backdrop-filter: none; }
+  .article .precedent { break-inside: avoid; }
+  .article h2, .article .body h3 { break-after: avoid; }
+  .article .points li { break-inside: avoid; }
+  a { color: inherit; }
+}
