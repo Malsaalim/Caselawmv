@@ -171,12 +171,12 @@ function entryCard(key, e) {
 
 // Sub-tabs of the legal-principles section, chosen from each entry's court.
 const COURT_TABS = [
-  { key: "supreme", label: "Supreme Court Decisions", match: /ސުޕްރީމް/ },
-  { key: "high", label: "High Court Decisions", match: /ހައިކޯޓު/ },
-  { key: "criminal", label: "Criminal Court Decisions", match: /ކްރިމިނަލް/ },
-  { key: "civil", label: "Civil Court Decisions", match: /ސިވިލް/ },
-  { key: "family", label: "Family Court Decisions", match: /ފެމިލީ/ },
-  { key: "juvenile", label: "Juvenile Court Decisions", match: /ޖުވެނައިލް/ },
+  { key: "supreme", label: "ސުޕްރީމް ކޯޓުގެ ނިންމުންތައް", match: /ސުޕްރީމް/ },
+  { key: "high", label: "ހައިކޯޓުގެ ނިންމުންތައް", match: /ހައިކޯޓު/ },
+  { key: "criminal", label: "ކްރިމިނަލް ކޯޓުގެ ނިންމުންތައް", match: /ކްރިމިނަލް/ },
+  { key: "civil", label: "ސިވިލް ކޯޓުގެ ނިންމުންތައް", match: /ސިވިލް/ },
+  { key: "family", label: "ފެމިލީ ކޯޓުގެ ނިންމުންތައް", match: /ފެމިލީ/ },
+  { key: "juvenile", label: "ޖުވެނައިލް ކޯޓުގެ ނިންމުންތައް", match: /ޖުވެނައިލް/ },
 ];
 const courtTabOf = e => (COURT_TABS.find(t => t.key === e.courtTab || t.match.test(e.court || "")) || {}).key;
 
