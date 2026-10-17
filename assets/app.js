@@ -90,7 +90,7 @@ function precedentsHtml(list) {
 }
 
 // Keep case numbers (2019/SC-L/87) and citations ([2021] SC 51) left-to-right inside Thaana text.
-const CASE_NO = /\[\d{4}\]\s+[A-Z]+\s+\d+|[0-9A-Za-z]+(?:[-\/()][0-9A-Za-z]+)*\/(?:[0-9A-Za-z()]+[-\/]?)+/g;
+const CASE_NO = /\[\d{4}\]\s+[A-Z]+\s+\d+|[0-9A-Za-z]+(?:[-\/][0-9A-Za-z]+)*\/(?:[0-9A-Za-z]+|\([0-9A-Za-z]+\))(?:(?:[-\/]|,(?=\d))(?:[0-9A-Za-z]+|\([0-9A-Za-z]+\)))*/g;
 const ltrRuns = html => html.replace(CASE_NO, m => `<bdi dir="ltr">${m}</bdi>`);
 
 // Paragraphs; a paragraph starting with "### " is a sub-heading, one made of numbered lines is a list.
@@ -336,7 +336,7 @@ async function downloadDocx(e) {
   const latin = { ascii: "Calibri", hAnsi: "Calibri", cs: "Calibri" };
   // Thaana goes in right-to-left Faruma runs; citations, case numbers, numbers and English in left-to-right
   // Calibri runs (Faruma draws [ ] and Latin as other glyphs).
-  const LTR = /(\[\d{4}\]\s+[A-Z]+\s+\d+|[0-9A-Za-z]+(?:[-\/()][0-9A-Za-z]+)*\/(?:[0-9A-Za-z()]+[-\/]?)+|[A-Za-z][A-Za-z0-9 .,'’()&:\/-]*[A-Za-z0-9.)]|[A-Za-z]|\d[\d,.\/-]*\d|\d)/;
+  const LTR = /(\[\d{4}\]\s+[A-Z]+\s+\d+|[0-9A-Za-z]+(?:[-\/][0-9A-Za-z]+)*\/(?:[0-9A-Za-z]+|\([0-9A-Za-z]+\))(?:(?:[-\/]|,(?=\d))(?:[0-9A-Za-z]+|\([0-9A-Za-z]+\)))*|[A-Za-z][A-Za-z0-9 .,'’()&:\/-]*[A-Za-z0-9.)]|[A-Za-z]|\d[\d,.\/-]*\d|\d)/;
   const runs = (text, o = {}) => String(text).split(LTR).filter(Boolean).map((t, i) => {
     const ltr = LTR.test(t) && !/[\u0780-\u07BF]/.test(t);
     return new TextRun({ text: ltr ? `\u200E${t}\u200E` : t, font: ltr ? latin : font, rightToLeft: !ltr, size: o.size || 26, sizeComplexScript: o.size || 26,
