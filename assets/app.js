@@ -25,6 +25,33 @@ const CATEGORIES = {
 
 const SC_REGISTRY = "https://www.supremecourt.mv/case-registry/judgments";
 
+// Supabase client (null until assets/supabase-config.js is filled in).
+const sb = (() => {
+  const url = window.SUPABASE_URL || "", key = window.SUPABASE_ANON_KEY || "";
+  if (!window.supabase || !url || /YOUR-/.test(url + key)) return null;
+  return window.supabase.createClient(url, key);
+})();
+
+const fromRow = r => ({
+  id: r.id, title: r.title, titleEn: r.title_en, court: r.court, caseNo: r.case_no, citation: r.citation,
+  date: r.date, summary: r.summary, body: r.body, pdf: r.pdf, url: r.url
+});
+const toRow = (category, e) => ({
+  id: e.id, category, title: e.title, title_en: e.titleEn || null, court: e.court || null, case_no: e.caseNo || null,
+  citation: e.citation || null, date: e.date || null, summary: e.summary || null, body: e.body || null,
+  pdf: e.pdf || null, url: e.url || null
+});
+
+// The site's own entries: from Supabase when configured, otherwise from the JSON file.
+async function loadOwn(key) {
+  if (sb) {
+    const { data, error } = await sb.from("entries").select("*").eq("category", key);
+    if (!error) return data.map(fromRow);
+    console.warn("Supabase:", error.message);
+  }
+  return fetchJson(CATEGORIES[key].file);
+}
+
 const MONTHS = ["ޖަނަވަރީ", "ފެބުރުއަރީ", "މާރިޗު", "އޭޕްރީލު", "މެއި", "ޖޫން",
   "ޖުލައި", "އޯގަސްޓު", "ސެޕްޓެމްބަރު", "އޮކްޓޫބަރު", "ނޮވެމްބަރު", "ޑިސެމްބަރު"];
 
@@ -63,7 +90,7 @@ function normalizeSynced(e) {
 
 async function loadCategory(key) {
   const cat = CATEGORIES[key];
-  const own = (await fetchJson(cat.file)).sort(byDate);
+  const own = (await loadOwn(key)).sort(byDate);
   if (!cat.sync) return own;
   let synced = (await fetchJson(cat.sync.file)).map(normalizeSynced).sort(byDate);
   if (cat.sync.limit) synced = synced.slice(0, cat.sync.limit);

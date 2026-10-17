@@ -12,13 +12,21 @@ A Dhivehi (RTL) static website for Maldivian court decisions, hosted on GitHub P
 | `view.html` | Single decision / article page |
 | `admin.html` | Admin panel |
 
-Content lives in `data/higher.json`, `data/recent.json` and `data/principles.json`. PDFs go in `uploads/`.
+The site's own entries live in **Supabase** (table `entries`, PDFs in the Storage bucket `pdfs`). Until Supabase is configured the pages fall back to `data/higher.json`, `data/recent.json` and `data/principles.json`. The Supreme Court judgment list (`data/sc-judgments.json`) and its legal principles (`data/sc-principles.json`) are still committed to this repo by the daily sync.
+
+## Connecting Supabase
+1. Create a project at [supabase.com](https://supabase.com).
+2. In the dashboard open **SQL Editor**, paste [`supabase/schema.sql`](supabase/schema.sql) and run it. It creates the `entries` and `admins` tables, the row-level security policies, and the `pdfs` (public) and `inbox` (private) storage buckets.
+3. Open **Project Settings → API** and copy the Project URL and the `anon` public key into [`assets/supabase-config.js`](assets/supabase-config.js). The anon key is meant to be public; never put the `service_role` key in the site.
+4. Under **Authentication → Users**, add a user with an email and password. Then make that user an admin in the SQL Editor:
+   ```sql
+   insert into public.admins (user_id) select id from auth.users where email = 'you@example.com';
+   ```
+5. Under **Authentication → Sign In / Providers**, turn off "Allow new users to sign up" (only admins need accounts).
 
 ## Using the admin panel
-1. Create a fine-grained token at GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens.
-   - Repository access: **Only select repositories → Caselawmv**
-   - Permissions: **Contents → Read and write**
-2. Open `/admin.html` on the site, paste the token, and log in. The token is stored only in that browser.
-3. Choose a section, fill in the form, and publish. Each save is a commit to this repo; the live site updates within 1–2 minutes.
+Open `/admin.html` on the site and log in with the admin email and password. Entries are saved straight to Supabase and appear on the site immediately.
 
-Anyone can open `admin.html`, but nothing can be changed without a token that has write access to this repository.
+The "judgment PDF" tab uploads PDFs to the private `inbox` bucket. The daily legal-principles task (`scripts/PRINCIPLES_TASK.md`) reads them with `scripts/supabase_inbox.py`, which needs `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` set in the task's environment.
+
+Anyone can open `admin.html`, but only users listed in `public.admins` can change anything.
