@@ -237,6 +237,7 @@ async function initViewPage() {
       ${e.date ? `<span>${fmtDate(e.date)}</span>` : ""}
     </div>
     ${e.titleEn ? `<p class="ltr" style="display:block;color:var(--muted);margin:8px 0 0">${esc(e.titleEn)}</p>` : ""}
+    ${key === "principles" && e.body ? `<p style="margin:16px 0 0"><button class="btn" id="docxBtn" type="button">⬇ Download the word file</button></p>` : ""}
     ${e.summary ? `<div class="summary">${esc(e.summary)}</div>` : ""}
     ${e.facts ? `<h2>މައްސަލައިގެ ޚުލާޞާ</h2><div class="body">${paragraphs(e.facts)}</div>` : ""}
     ${e.body ? `<div class="body">${e.facts ? "<h2>ޤާނޫނީ އުސޫލުތައް</h2><p class=\"hint\">ނިންމުމަށް ފަނޑިޔާރުން ބިނާކުރެއްވި ޤާނޫނީ އުސޫލުތަކާއި މަތީ ކޯޓުތަކުގެ ސާބިޤާތައް</p>" : ""}${points(e.body)}</div>${precedentsHtml(e.precedents)}` :
@@ -247,6 +248,79 @@ async function initViewPage() {
       ${e.url ? `<a class="btn secondary" href="${esc(e.url)}" target="_blank" rel="noopener">ސުޕްރީމް ކޯޓުގެ ވެބްސައިޓުގައި ބަލާ ↗</a>` : ""}
     </p>
   </article>`;
+  const docxBtn = document.getElementById("docxBtn");
+  if (docxBtn) docxBtn.onclick = async () => {
+    const label = docxBtn.textContent;
+    docxBtn.disabled = true; docxBtn.textContent = "ތައްޔާރުކުރަނީ…";
+    try { await downloadDocx(e); }
+    catch (err) { alert(`Word ފައިލް ތައްޔާރު ނުކުރެވުނު: ${err.message}`); }
+    finally { docxBtn.disabled = false; docxBtn.textContent = label; }
+  };
+}
+
+// ---- Word (.docx) export of a legal-principles entry ----
+const DOCX_LIB = "https://cdn.jsdelivr.net/npm/docx@9.0.2/build/index.umd.js";
+function loadScript(src) {
+  return new Promise((res, rej) => {
+    const s = document.createElement("script");
+    s.src = src; s.onload = res; s.onerror = () => rej(new Error("docx library failed to load"));
+    document.head.appendChild(s);
+  });
+}
+
+async function downloadDocx(e) {
+  if (!window.docx) await loadScript(DOCX_LIB);
+  const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = window.docx;
+  const font = { ascii: "Calibri", hAnsi: "Calibri", cs: "Faruma" };
+  const latin = { ascii: "Calibri", hAnsi: "Calibri", cs: "Calibri" };
+  // Thaana goes in right-to-left Faruma runs; citations, case numbers, numbers and English in left-to-right
+  // Calibri runs (Faruma draws [ ] and Latin as other glyphs).
+  const LTR = /(\[\d{4}\]\s+[A-Z]+\s+\d+|\d{4}\/[A-Za-z][A-Za-z-]*\/\d+|[A-Za-z][A-Za-z0-9 .,'’()&:\/-]*[A-Za-z0-9.)]|[A-Za-z]|\d[\d,.\/-]*\d|\d)/;
+  const runs = (text, o = {}) => String(text).split(LTR).filter(Boolean).map((t, i) => {
+    const ltr = LTR.test(t) && !/[\u0780-\u07BF]/.test(t);
+    return new TextRun({ text: ltr ? `\u200E${t}\u200E` : t, font: ltr ? latin : font, rightToLeft: !ltr, size: o.size || 26, sizeComplexScript: o.size || 26,
+      bold: o.bold, boldComplexScript: o.bold, color: o.color });
+  });
+  const para = (text, o = {}) => new Paragraph({ bidirectional: true, alignment: o.align || AlignmentType.BOTH,
+    spacing: { after: o.after ?? 120, line: 340 }, indent: o.indent ? { right: o.indent } : undefined,
+    heading: o.heading, children: runs(text, o) });
+  const heading = (text, size = 32) => para(text, { bold: true, size, color: "0E2E49", after: 160, heading: HeadingLevel.HEADING_2 });
+  const sub = text => para(text, { bold: true, size: 28, color: "123B5D", after: 80, heading: HeadingLevel.HEADING_3 });
+  const lines = text => String(text || "").split("\n").map(l => l.trim()).filter(Boolean);
+  const block = text => String(text || "").split(/\n\s*\n/).flatMap(p =>
+    /^###\s/.test(p) ? [sub(p.replace(/^###\s+/, ""))] :
+    lines(p).every(l => /^\d+[.)]\s/.test(l)) ? lines(p).map(l => para(l, { indent: 360 })) : [para(p.replace(/\n/g, " "))]);
+
+  const children = [
+    para(e.title, { bold: true, size: 36, color: "0E2E49", align: AlignmentType.CENTER, after: 60 }),
+    para([e.citation, e.caseNo, e.court, e.date && fmtDate(e.date)].filter(Boolean).join("  |  "), { size: 22, color: "7B8496", align: AlignmentType.CENTER, after: 60 }),
+  ];
+  if (e.titleEn) children.push(para(e.titleEn, { size: 22, color: "7B8496", align: AlignmentType.CENTER, after: 240 }));
+  if (e.summary) children.push(para(e.summary, { bold: true, after: 240 }));
+  if (e.facts) children.push(heading("މައްސަލައިގެ ޚުލާޞާ"), ...block(e.facts));
+  children.push(heading("ޤާނޫނީ އުސޫލުތައް"), ...lines(e.body).map(l => para(l, { indent: 360 })));
+  if (Array.isArray(e.precedents) && e.precedents.length) {
+    children.push(heading("މި ނިންމުމުގައި ހަވާލާދީފައިވާ ސާބިޤާތައް"));
+    for (const p of e.precedents) {
+      children.push(sub(p.name));
+      const ref = p.reference || [p.citation, p.caseNo].filter(Boolean).join(" ");
+      if (ref) children.push(para(ref, { size: 22, color: "7B8496", after: 60 }));
+      if (p.parties) children.push(para(`ފަރާތްތައް: ${p.parties}`));
+      if (p.principles) children.push(para("ކަނޑައަޅާފައިވާ ޤާނޫނީ އުސޫލުތައް:", { bold: true, after: 60 }), ...lines(p.principles).map(l => para(l, { indent: 360 })));
+    }
+  }
+  children.push(para(`ކޭސްލޯ އެމްވީ — ${location.href}`, { size: 18, color: "7B8496", align: AlignmentType.CENTER }));
+
+  const doc = new Document({
+    creator: "CaseLaw MV", title: e.title,
+    styles: { default: { document: { run: { font, rightToLeft: true } } } },
+    sections: [{ properties: { page: { margin: { top: 1134, bottom: 1134, left: 1134, right: 1134 } } }, children }]
+  });
+  const blob = await Packer.toBlob(doc);
+  const name = `${(e.citation || e.caseNo || e.id).replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "")}-legal-principles.docx`;
+  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: name });
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
 async function initHome() {
