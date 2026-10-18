@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="dv" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF to Doc Scan | CaseLaw MV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thaana:wght@400;700&family=Playfair+Display:wght@800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div id="header"></div>
+<main class="wrap">
+  <div class="page-head"><h1 dir="ltr" style="text-align:right">PDF to Doc Scan</h1>
+    <p>PDF ފައިލެއް ހޮވާފައި "Convert PDF to doc" އަށް ފިއްތަވާ. ލިޔުން ހިމެނޭ PDF ގެ ލިޔުން ސީދާ ނަގައި، ސްކޭން ކޮށްފައިވާ ޞަފްޙާތައް OCR އިން ކިޔައި، ފަރުމާ ފޮންޓުން Word (.docx) ފައިލަކަށް ބަދަލުކޮށްދޭނެއެވެ. ފައިލް ކޮމްޕިއުޓަރުން ބޭރަށް ނުފޮނުވެއެވެ.</p>
+  </div>
+  <section class="panel convert-panel">
+    <p><button class="btn" id="convertBtn" type="button" disabled>Convert PDF to doc</button></p>
+    <p>
+      <label class="btn btn-outline" for="pdfFile">⬆ Upload PDF file</label>
+      <input id="pdfFile" type="file" accept="application/pdf,.pdf" hidden>
+      <span id="fileName" class="hint" dir="ltr"></span>
+    </p>
+    <p class="hint"><label style="display:flex;gap:8px;align-items:center;font-weight:normal"><input type="checkbox" id="forceOcr" style="width:auto;margin:0"> ހުރިހާ ޞަފްޙާއެއް OCR އިން ކިޔާ (PDF ގެ ލިޔުން ނުވަތަ ނަންބަރުތައް އޮޅިފައި ފެންނަނަމަ)</label></p>
+    <div class="status" id="status"></div>
+    <progress id="progress" max="1" value="0" hidden></progress>
+  </section>
+</main>
+<div id="footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="assets/supabase-config.js"></script>
+<script src="assets/app.js"></script>
+<script src="assets/pdf2doc.js"></script>
+<script>renderChrome("pdf2doc"); initPdfToDoc();</script>
+</body>
+</html>

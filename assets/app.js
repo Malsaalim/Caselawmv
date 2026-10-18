@@ -144,6 +144,7 @@ function renderChrome(active) {
       </a>
       <nav class="nav">
         <a href="index.html" class="${active === "home" ? "active" : ""}">މައި ޞަފްޙާ</a>${nav}
+        <a href="pdf-to-doc.html" class="${active === "pdf2doc" ? "active" : ""}" dir="ltr">PDF to Doc Scan</a>
       </nav>
     </div></header>`;
   document.getElementById("footer").innerHTML = `
@@ -396,7 +397,12 @@ async function initHome() {
       <h2>${CATEGORIES[k].title}</h2>
       <p>${CATEGORIES[k].desc}</p>
       <span class="count" id="count-${k}"></span>
-    </a>`).join("");
+    </a>`).join("") + `
+    <a class="tab-card" href="pdf-to-doc.html">
+      <span class="num">${keys.length + 1}</span>
+      <h2 dir="ltr" style="text-align:right">PDF to Doc Scan</h2>
+      <p>PDF ފައިލެއް ފަރުމާ ފޮންޓުން Word (.docx) ފައިލަކަށް ބަދަލުކުރުން</p>
+    </a>`;
   for (const k of keys) {
     loadCategory(k).then(items => {
       document.getElementById(`count-${k}`).textContent = `ލިޔުންތައް: ${items.length}`;
