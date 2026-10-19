@@ -248,7 +248,16 @@ function buildLines(glyphs, rects) {
     for (const c of vis) c.sup = !c.space && c.size < r.size * 0.8 && c.y > r.y + r.size * 0.2;
     for (const c of vis) c.underline = rects.some(q => q.x0 <= (c.x0 + c.x1) / 2 && q.x1 >= (c.x0 + c.x1) / 2 && q.y1 < c.y + 1 && q.y1 > c.y - c.size * 0.45);
     const rtl = vis.some(c => THAANA.test(c.u));
-    const logical = rtl ? visualToLogical(vis) : vis;
+    let logical = rtl ? visualToLogical(vis) : vis;
+    // Some PDF producers store the mirrored bracket glyph (")" for an opening bracket in Dhivehi text).
+    // If a line's brackets read ")…(" in logical order, swap them back.
+    if (rtl) {
+      const br = logical.filter(c => /^[()]$/.test(c.u)).map(c => c.u).join("");
+      if (br && br[0] === ")" && !/^\(/.test(br)) {
+        const swap = { "(": ")", ")": "(", "[": "]", "]": "[" };
+        logical = logical.map(c => (swap[c.u] && !c.ltr ? { ...c, u: swap[c.u] } : c));
+      }
+    }
     const ink = vis.filter(c => !c.space);
     return {
       y: r.y, size: r.size, rtl,
