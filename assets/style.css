@@ -234,3 +234,6 @@ body::before {
   /* Justified text in the downloaded PDF (the Word export is justified too). */
   .article .summary, .article .body p, .article .points li, .article .precedent p { text-align: justify; text-justify: inter-word; }
 }
+.acc-list { list-style: none; padding: 0; margin: 0; }
+.acc-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line, #e6e1d6); }
+.acc-row .btn { padding: 6px 12px; font-size: 14px; }

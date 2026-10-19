@@ -73,3 +73,15 @@ create policy "admins manage pdfs" on storage.objects for all to authenticated
   using (bucket_id = 'pdfs' and public.is_admin()) with check (bucket_id = 'pdfs' and public.is_admin());
 create policy "admins manage inbox" on storage.objects for all to authenticated
   using (bucket_id = 'inbox' and public.is_admin()) with check (bucket_id = 'inbox' and public.is_admin());
+
+-- "convert": private PDFs queued for accurate (human-quality) Dhivehi conversion and the finished .docx files.
+--   queue/<name>.pdf  → waiting;  done/<name>.docx → finished;  failed/<name>.pdf → could not be read.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types) values
+  ('convert', 'convert', false, 52428800, array['application/pdf',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
+on conflict (id) do update set public = excluded.public,
+  file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "admins manage convert" on storage.objects;
+create policy "admins manage convert" on storage.objects for all to authenticated
+  using (bucket_id = 'convert' and public.is_admin()) with check (bucket_id = 'convert' and public.is_admin());

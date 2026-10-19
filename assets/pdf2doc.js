@@ -546,3 +546,75 @@ function layoutPage(D, p, m) {
   }
   return out;
 }
+
+// ---- Accurate conversion: scanned PDFs queued for the daily task, which reads every page and writes the .docx ----
+// Storage bucket "convert" (admins only): queue/<name>.pdf → done/<name>.docx (or failed/<name>.pdf).
+
+async function initAccurateConversion() {
+  const panel = document.getElementById("accuratePanel");
+  if (typeof sb === "undefined" || !sb) { panel.hidden = true; return; }
+  const { data } = await sb.auth.getSession();
+  if (!data.session) { document.getElementById("accSignedOut").hidden = false; return; }
+  document.getElementById("accSignedIn").hidden = false;
+  const input = document.getElementById("accFile"), btn = document.getElementById("accSendBtn");
+  input.addEventListener("change", () => {
+    const f = input.files[0];
+    document.getElementById("accFileName").textContent = f ? f.name : "";
+    btn.disabled = !f;
+  });
+  btn.addEventListener("click", async () => {
+    const f = input.files[0];
+    if (!f) return;
+    btn.disabled = true;
+    const status = document.getElementById("accStatus");
+    const say = (msg, kind) => { status.textContent = msg; status.className = `status show ${kind}`; };
+    try {
+      if (f.size > 50 * 1024 * 1024) throw new Error("50MB އަށްވުރެ ބޮޑު");
+      const base = f.name.toLowerCase().replace(/\.pdf$/, "").replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "") || "document";
+      const name = `${base}-${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, "")}.pdf`;
+      say("ފޮނުވަނީ…", "info");
+      const { error } = await sb.storage.from("convert").upload(`queue/${name}`, f, { contentType: "application/pdf", upsert: false });
+      if (error) throw error;
+      say("ފޮނުވިއްޖެ. މާދަމާ ހެނދުނު ނިމިގެން ތިރީގައިވާ ލިސްޓުގައި ފެންނާނެ.", "ok");
+      input.value = ""; document.getElementById("accFileName").textContent = "";
+      loadAccurateList();
+    } catch (e) { say("ނުފޮނުވުނު: " + e.message, "err"); btn.disabled = false; }
+  });
+  loadAccurateList();
+}
+
+async function loadAccurateList() {
+  const box = document.getElementById("accList");
+  const list = async folder => {
+    const { data, error } = await sb.storage.from("convert").list(folder, { limit: 200, sortBy: { column: "created_at", order: "desc" } });
+    if (error) throw error;
+    return (data || []).filter(f => f.id).map(f => ({ ...f, folder }));
+  };
+  try {
+    const [done, queue, failed] = await Promise.all([list("done"), list("queue"), list("failed")]);
+    const row = (f, label, kind) => `<li class="acc-row"><span dir="ltr">${esc(f.name)}</span>
+      <span class="hint">${label}</span>
+      ${kind === "done" ? `<button class="btn" data-get="${esc(f.name)}" type="button">⬇ Download</button>` : ""}
+      ${kind !== "queue" ? `<button class="btn btn-outline" data-del="${esc(f.folder + "/" + f.name)}" type="button">ފޮހެލާ</button>` : ""}</li>`;
+    const items = [
+      ...done.map(f => row(f, "ނިމިފައި", "done")),
+      ...queue.map(f => row(f, "ބަދަލުކުރުމަށް އިންތިޒާރުގައި (މާދަމާ ހެނދުނު)", "queue")),
+      ...failed.map(f => row(f, "ކިޔޭނެ ގޮތެއް ނުވި", "failed"))
+    ];
+    box.innerHTML = items.length ? `<ul class="acc-list">${items.join("")}</ul>` : `<p class="hint">އަދި އެއްވެސް ފައިލެއް ނެތް.</p>`;
+    box.querySelectorAll("[data-get]").forEach(b => b.onclick = async () => {
+      const { data, error } = await sb.storage.from("convert").download("done/" + b.dataset.get);
+      if (error) return alert(error.message);
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(data); a.download = b.dataset.get;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    });
+    box.querySelectorAll("[data-del]").forEach(b => b.onclick = async () => {
+      if (!confirm("މި ފައިލް ފޮހެލަންތަ؟")) return;
+      const { error } = await sb.storage.from("convert").remove([b.dataset.del]);
+      if (error) return alert(error.message);
+      loadAccurateList();
+    });
+  } catch (e) { box.innerHTML = `<p class="status show err">${esc(e.message)}</p>`; }
+}

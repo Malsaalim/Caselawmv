@@ -122,3 +122,34 @@ publish them, and clear the inbox.
    starts with a number, and every entry has `facts` and a `precedents` list.
 5. Commit once ("Add legal principles: <citations / case numbers>"), `git pull --rebase origin main`, push to `main`.
 6. Report which cases were published and any failures.
+
+## Accurate conversions (scanned PDF → .docx)
+
+The owner can queue PDFs on the "PDF to Doc Scan" page for accurate conversion — usually scanned Dhivehi documents
+(e.g. Civil Court decisions) that OCR cannot read. They wait in the Supabase Storage bucket `convert` under `queue/`.
+Process them after the inbox and **before** Civil Court decisions; they do not count toward the 10-judgment limit.
+At most 40 pages per run (the rest wait for the next run). Needs the same Supabase variables as the inbox.
+
+1. `python scripts/supabase_convert.py download /tmp/convert` (prints each downloaded file).
+2. For each PDF `NAME.pdf`: `pdfinfo` for the page size (points), then render
+   `pdftoppm -r 200 -png /tmp/convert/NAME.pdf /tmp/convert/NAME/page` (images `page-01.png`, `page-02.png`, … —
+   or `page-1.png` for fewer than 10 pages; `scripts/make_docx.py` accepts both).
+3. **Read every page yourself**, top half and bottom half separately (crop with PIL), at full resolution. Transcribe the
+   text **exactly as printed**: every word, letter, fili, number, date, ID, punctuation mark, quotation mark and bracket,
+   in the document's own spelling. Do not correct, translate, summarise, reorder or skip anything; do not guess — if a
+   word is truly illegible write `[…]`. Check every number twice against the image.
+4. Write `/tmp/convert/NAME.json` in the format described at the top of `scripts/make_docx.py`, one entry per PDF page:
+   - `size` from pdfinfo; `margins` from where the text block sits on the page.
+   - One block per paragraph, heading or line group, in reading order: `align` as on the page (`justify` for body
+     text, `right` for Dhivehi lines starting at the right margin, `center`, `left`), `size` matching the printed size
+     (body text is usually 13–14pt, footnotes 9–10pt), `bold`/`underline` for headings, `before` for the vertical gap,
+     `indent` for indented paragraphs. Use `**…**`, `__…__`, `^^…^^` for bold, underlined and superscript words inside a line.
+   - Keep the page's own line breaks (`\n`) only where the page has a hard break (headings, addresses, list items,
+     signature blocks, header/footer lines); let justified body paragraphs wrap on their own.
+   - Tables as `table` blocks; logos, seals, stamps and signatures as `image` crops (fractions of the page image).
+5. `python scripts/make_docx.py /tmp/convert/NAME.json /tmp/convert/NAME.docx --pages /tmp/convert/NAME`, then render it
+   (`soffice --headless --convert-to pdf`) and compare each page with the original image; fix the JSON and rebuild until
+   the text matches exactly and every page breaks where the original does.
+6. `python scripts/supabase_convert.py done NAME.pdf /tmp/convert/NAME.docx` (uploads `done/NAME.docx` and removes the
+   queued PDF). If the PDF truly cannot be read, `python scripts/supabase_convert.py fail NAME.pdf`.
+7. Mention each converted file (name and page count) in the report. Conversions make no commit to the repository.

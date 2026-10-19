@@ -25,12 +25,28 @@
     <div class="status" id="status"></div>
     <progress id="progress" max="1" value="0" hidden></progress>
   </section>
+  <section class="panel convert-panel" id="accuratePanel">
+    <h2 dir="ltr" style="text-align:right">Accurate conversion (scanned Dhivehi PDFs)</h2>
+    <p class="hint">ސްކޭން ކޮށްފައިވާ ދިވެހި PDF (ސިވިލް ކޯޓުގެ ނިންމުން ފަދަ) ލިޔުމަށް ބަދަލުކުރަން، މިތަނަށް ފޮނުއްވާ. ކޮންމެ ދުވަހަކު ހެނދުނު ހުރިހާ ޞަފްޙާއެއް ލޮލަށް ކިޔައި، ލިޔުމާއި ލޭއައުޓް PDF ގައިވާ ގޮތަށް Word ފައިލަކަށް ލިޔެ، ތިރީގައިވާ ލިސްޓުގައި ޑައުންލޯޑް ކުރެވޭނެ ގޮތަށް ބަހައްޓާނެއެވެ.</p>
+    <div id="accSignedOut" class="hint" hidden>މި ޚިދުމަތް ބޭނުންކުރެވޭނީ އެޑްމިން އެކައުންޓުން ލޮގިން ވެގެންނެވެ. <a href="admin.html">އެޑްމިން ޕެނަލަށް ލޮގިން ވުމަށް</a> ފަހު މި ޞަފްޙާ އަލުން ހުޅުއްވާ.</div>
+    <div id="accSignedIn" hidden>
+      <p><button class="btn" id="accSendBtn" type="button" disabled>Send for accurate conversion</button></p>
+      <p>
+        <label class="btn btn-outline" for="accFile">⬆ Upload PDF file</label>
+        <input id="accFile" type="file" accept="application/pdf,.pdf" hidden>
+        <span id="accFileName" class="hint" dir="ltr"></span>
+      </p>
+      <div class="status" id="accStatus"></div>
+      <h2 style="margin-top:20px">ބަދަލުކުރެވުނު ފައިލްތައް</h2>
+      <div id="accList"><p class="hint">ލޯޑުވަނީ…</p></div>
+    </div>
+  </section>
 </main>
 <div id="footer"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="assets/supabase-config.js"></script>
 <script src="assets/app.js"></script>
 <script src="assets/pdf2doc.js"></script>
-<script>renderChrome("pdf2doc"); initPdfToDoc();</script>
+<script>renderChrome("pdf2doc"); initPdfToDoc(); initAccurateConversion();</script>
 </body>
 </html>
