@@ -145,6 +145,7 @@ function renderChrome(active) {
       <nav class="nav">
         <a href="index.html" class="${active === "home" ? "active" : ""}">މައި ޞަފްޙާ</a>${nav}
         <a href="pdf-to-doc.html" class="${active === "pdf2doc" ? "active" : ""}" dir="ltr">PDF to Doc Scan</a>
+        <a href="admin.html" class="nav-login ${active === "admin" ? "active" : ""}">🔒 ލޮގިން</a>
       </nav>
     </div></header>`;
   document.getElementById("footer").innerHTML = `
@@ -387,8 +388,37 @@ async function downloadDocx(e) {
   setTimeout(() => URL.revokeObjectURL(a.href), 10000);
 }
 
+// Admin sign-in box at the top of the front page; a successful sign-in opens the admin panel.
+function initHomeLogin() {
+  const box = document.getElementById("homeLogin");
+  if (!box) return;
+  const $ = id => document.getElementById(id);
+  const status = (msg, cls) => { const el = $("hlStatus"); el.textContent = msg; el.className = `status show ${cls}`; };
+  if (!sb) { box.style.display = "none"; return; }
+  const signedIn = email => {
+    $("hlForm").style.display = "none";
+    $("hlSignedIn").style.display = "flex";
+    $("hlWho").textContent = email;
+  };
+  sb.auth.getSession().then(({ data }) => { if (data.session) signedIn(data.session.user.email); });
+  const login = async () => {
+    const email = $("hlEmail").value.trim(), password = $("hlPassword").value;
+    if (!email || !password) return status("އީމެއިލް އަދި ޕާސްވޯޑް ލިޔުއްވާ", "err");
+    $("hlBtn").disabled = true;
+    status("ލޮގިން ވަނީ…", "info");
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    $("hlBtn").disabled = false;
+    if (error) return status(`ލޮގިން ނުވެވުނު: ${error.message}`, "err");
+    location.href = "admin.html";
+  };
+  $("hlBtn").onclick = login;
+  $("hlPassword").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+  $("hlLogout").onclick = async () => { await sb.auth.signOut(); location.reload(); };
+}
+
 async function initHome() {
   renderChrome("home");
+  initHomeLogin();
   const grid = document.getElementById("tabs");
   const keys = Object.keys(CATEGORIES);
   grid.innerHTML = keys.map((k, i) => `

@@ -11,6 +11,26 @@
 <body>
 <div id="header"></div>
 <main class="wrap">
+  <section class="home-login" id="homeLogin">
+    <h2>އެޑްމިން ލޮގިން</h2>
+    <div class="hl-form" id="hlForm">
+      <div>
+        <label for="hlEmail">އީމެއިލް</label>
+        <input id="hlEmail" type="email" dir="ltr" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false">
+      </div>
+      <div>
+        <label for="hlPassword">ޕާސްވޯޑް</label>
+        <input id="hlPassword" type="password" dir="ltr" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+      </div>
+      <button class="btn" id="hlBtn">ލޮގިން</button>
+    </div>
+    <div class="hl-signed" id="hlSignedIn" style="display:none">
+      <span>ލޮގިން ވެވިފައި: <b id="hlWho" dir="ltr"></b></span>
+      <a class="btn" href="admin.html">އެޑްމިން ޕެނަލް</a>
+      <button class="btn secondary" id="hlLogout">ލޮގްއައުޓް</button>
+    </div>
+    <div class="status" id="hlStatus"></div>
+  </section>
   <section class="hero">
     <h1>ދިވެހިރާއްޖޭގެ ކޯޓުތަކުގެ ނިންމުންތަކާއި ޤާނޫނީ އުސޫލުތައް</h1>
     <p>ކޯޓުތަކުން ނިންމާފައިވާ މުހިންމު މައްސަލަތަކާއި، އެ ނިންމުންތަކުން ކަނޑައެޅިފައިވާ ޤާނޫނީ އުސޫލުތައް އެއްތަނަކުން ކިޔައި ހޯދުމުގެ ފުރުޞަތު.</p>

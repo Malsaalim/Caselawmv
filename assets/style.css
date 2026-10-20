@@ -237,3 +237,16 @@ body::before {
 .acc-list { list-style: none; padding: 0; margin: 0; }
 .acc-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line, #e6e1d6); }
 .acc-row .btn { padding: 6px 12px; font-size: 14px; }
+
+/* Admin sign-in box on the front page */
+.home-login {
+  margin-top: 24px; padding: 18px 22px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: rgba(255, 255, 255, .94); box-shadow: var(--shadow);
+}
+.home-login h2 { margin: 0 0 10px; font-size: 18px; color: var(--brand-2); }
+.hl-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
+.hl-form input { width: 100%; }
+.hl-signed { align-items: center; gap: 10px; flex-wrap: wrap; }
+.home-login + .hero { padding-top: 32px; }
+.nav a.nav-login { border: 1px solid rgba(255,255,255,.45); }
+@media (max-width: 640px) { .hl-form { grid-template-columns: 1fr; } }
