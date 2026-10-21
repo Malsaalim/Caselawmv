@@ -116,6 +116,28 @@
       <p class="hint" id="inboxDone"></p>
     </section>
 
+    <!-- Change the admin password -->
+    <section class="panel" id="passwordPanel">
+      <h2>ޕާސްވޯޑް ބަދަލުކުރުން</h2>
+      <div class="form-grid">
+        <div class="full">
+          <label for="pwCurrent">މިހާރުގެ ޕާސްވޯޑް</label>
+          <input id="pwCurrent" type="password" dir="ltr" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+        </div>
+        <div>
+          <label for="pwNew">އައު ޕާސްވޯޑް</label>
+          <input id="pwNew" type="password" dir="ltr" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+        </div>
+        <div>
+          <label for="pwConfirm">އައު ޕާސްވޯޑް އަނބުރާ</label>
+          <input id="pwConfirm" type="password" dir="ltr" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+        </div>
+        <p class="hint full">މަދުވެގެން 12 އަކުރު، އޭގެ ތެރޭގައި ބޮޑު އަކުރު، ކުދި އަކުރު، ނަންބަރު އަދި ނިޝާނެއް (މިސާލު: @ # !). ބަދަލުކުރުމުން އެހެން ހުރިހާ ޑިވައިސްއަކުން ލޮގްއައުޓް ވާނެ.</p>
+      </div>
+      <button class="btn" id="pwBtn">ޕާސްވޯޑް ބަދަލުކުރޭ</button>
+      <div class="status" id="pwStatus"></div>
+    </section>
+
     <button class="btn secondary" id="logoutBtn">ނުކުމެވޭ</button>
     <div style="height:48px"></div>
   </div>
@@ -147,6 +169,30 @@ function ok({ data, error }) {
 
 // Storage path of a PDF in the "pdfs" bucket, from its public URL.
 const pdfPath = url => (String(url || "").split("/storage/v1/object/public/pdfs/")[1] || "").split("?")[0];
+
+async function changePassword() {
+  const cur = $("pwCurrent").value, pw = $("pwNew").value, again = $("pwConfirm").value, st = $("pwStatus");
+  if (!cur || !pw) return show(st, "މިހާރުގެ ޕާސްވޯޑާއި އައު ޕާސްވޯޑް ލިޔުއްވާ", "err");
+  if (pw !== again) return show(st, "އައު ޕާސްވޯޑް ދެ ފަހަރު ލިޔުއްވި ގޮތް ދިމައެއް ނުވޭ", "err");
+  if (pw.length < 12 || !/[a-z]/.test(pw) || !/[A-Z]/.test(pw) || !/[0-9]/.test(pw) || !/[^A-Za-z0-9]/.test(pw))
+    return show(st, "އައު ޕާސްވޯޑަކީ 12 އަކުރަށްވުރެ ދިގު، ބޮޑު އަކުރު، ކުދި އަކުރު، ނަންބަރު އަދި ނިޝާނެއް ހިމެނޭ ޕާސްވޯޑަކަށް ވާންވާނެ", "err");
+  if (pw === cur) return show(st, "އައު ޕާސްވޯޑަކީ މިހާރުގެ ޕާސްވޯޑާ ތަފާތު ޕާސްވޯޑަކަށް ވާންވާނެ", "err");
+  $("pwBtn").disabled = true;
+  try {
+    const { data } = await sb.auth.getUser();
+    // Re-check the current password before changing it.
+    const { error: e1 } = await sb.auth.signInWithPassword({ email: data.user.email, password: cur });
+    if (e1) throw new Error("މިހާރުގެ ޕާސްވޯޑް ރަނގަޅެއް ނޫން");
+    ok(await sb.auth.updateUser({ password: pw }));
+    await sb.auth.signOut({ scope: "others" });
+    ["pwCurrent", "pwNew", "pwConfirm"].forEach(id => $(id).value = "");
+    show(st, "ޕާސްވޯޑް ބަދަލުކުރެވިއްޖެ. އެހެން ޑިވައިސްތަކުން ލޮގްއައުޓް ކުރެވިއްޖެ.", "ok");
+  } catch (err) {
+    show(st, `ބަދަލެއް ނުކުރެވުނު: ${err.message}`, "err");
+  } finally {
+    $("pwBtn").disabled = false;
+  }
+}
 
 async function enterDashboard() {
   if (!ok(await sb.rpc("is_admin"))) {
@@ -354,6 +400,7 @@ if (!sb) {
   $("password").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
   $("form").addEventListener("submit", save);
   $("resetBtn").onclick = resetForm;
+  $("pwBtn").onclick = changePassword;
   $("logoutBtn").onclick = async () => { await sb.auth.signOut(); location.reload(); };
   // Resume an existing session.
   sb.auth.getSession().then(({ data }) => {
