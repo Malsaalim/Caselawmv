@@ -103,11 +103,11 @@
       <h2>ޤާނޫނީ އުސޫލު ލިޔުމަށް ޖަޖްމަންޓް PDF އަޕްލޯޑް</h2>
       <p class="hint">ސުޕްރީމް ކޯޓުގެ ވެބްސައިޓުން ޑައުންލޯޑް ކުރި PDF ފައިލްތައް (ފައިލްގެ ނަމަށް ބަދަލު ނުގެނެސް) މިތަނަށް އަޕްލޯޑް ކުރައްވާ. ކޮންމެ ދުވަހަކު ހެނދުނު މި ފައިލްތައް ކިޔައި، ކޮންމެ މައްސަލައެއްގެ ޤާނޫނީ އުސޫލުތައް (20 ލައިނަށްވުރެ ކުރުކޮށް) ޝާއިޢު ކުރެވޭނެ.</p>
       <p class="hint">ސުޕްރީމް ކޯޓުގެ އައު ނިންމުންތައް ކޮންމެ ދުވަހަކު އޮޓޮމެޓިކުން މިތަނަށް ފޮނުވުމަށް، މި ޕްރޮގްރާމް ތިޔަ ކޮމްޕިއުޓަރުގައި ހަރުކުރައްވާ: <a href="tools/court-fetcher.zip" download dir="ltr">court-fetcher.zip</a> (ތަފްޞީލު ޒިޕް ފައިލުގެ README.md ގައި).</p>
-      <div class="form-grid">
-        <div class="full">
-          <label for="inboxFiles">PDF ފައިލްތައް (އެއްފަހަރާ ގިނަ ފައިލް ހޮވިދާނެ)</label>
-          <input id="inboxFiles" type="file" accept="application/pdf" multiple>
-        </div>
+      <div class="drop-zone" id="inboxDrop">
+        <div class="drop-icon">📄</div>
+        <p><b>PDF ފައިލްތައް މިތަނަށް ދަމައިގެން ގެނެސް ދޫކޮށްލައްވާ</b></p>
+        <p class="hint">ނުވަތަ ތިރީގައިވާ ފައިލް ހޮވާ ބަޓަނުން ހޮއްވަވާ (އެއްފަހަރާ ގިނަ ފައިލް ހޮވިދާނެ)</p>
+        <input id="inboxFiles" type="file" accept="application/pdf" multiple>
       </div>
       <p><button class="btn" id="inboxUpload">އަޕްލޯޑް ކުރޭ</button></p>
       <div class="status" id="inboxStatus"></div>
@@ -266,8 +266,8 @@ async function loadInbox() {
   $("inboxDone").textContent = `ޤާނޫނީ އުސޫލު ލިޔެވިފައިވާ މައްސަލަތައް: ${done.length}`;
 }
 
-async function uploadInbox() {
-  const files = [...$("inboxFiles").files];
+async function uploadInbox(dropped) {
+  const files = dropped || [...$("inboxFiles").files];
   if (!files.length) return show($("inboxStatus"), "PDF ފައިލެއް ހޮއްވަވާ", "err");
   const btn = $("inboxUpload"); btn.disabled = true;
   let n = 0; const fails = [];
@@ -396,7 +396,22 @@ if (!sb) {
   show($("loginStatus"), "Supabase ގުޅާފައެއް ނުވޭ: assets/supabase-config.js ގައި SUPABASE_URL އަދި SUPABASE_ANON_KEY ލިޔުއްވާ.", "err");
 } else {
   $("loginBtn").onclick = login;
-  $("inboxUpload").onclick = uploadInbox;
+  $("inboxUpload").onclick = () => uploadInbox();
+  // Drag and drop PDFs onto the upload box: they upload straight away.
+  const drop = $("inboxDrop");
+  ["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "dragend"].forEach(ev => drop.addEventListener(ev, e => { if (!drop.contains(e.relatedTarget)) drop.classList.remove("over"); }));
+  drop.addEventListener("drop", e => {
+    e.preventDefault(); drop.classList.remove("over");
+    const all = [...e.dataTransfer.files];
+    const pdfs = all.filter(f => f.type === "application/pdf" || /\.pdf$/i.test(f.name));
+    if (!pdfs.length) return show($("inboxStatus"), "PDF ފައިލެއް ނޫން. PDF ފައިލްތައް ދޫކޮށްލައްވާ.", "err");
+    uploadInbox(pdfs).then(() => {
+      if (pdfs.length < all.length) show($("inboxStatus"), $("inboxStatus").textContent + ` (PDF ނޫން ${all.length - pdfs.length} ފައިލް ދޫކޮށްލެވިއްޖެ)`, $("inboxStatus").className.includes("err") ? "err" : "ok");
+    });
+  });
+  // Dropping a file elsewhere on the page must not open it in the browser.
+  ["dragover", "drop"].forEach(ev => window.addEventListener(ev, e => { if (!drop.contains(e.target)) e.preventDefault(); }));
   $("password").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
   $("form").addEventListener("submit", save);
   $("resetBtn").onclick = resetForm;

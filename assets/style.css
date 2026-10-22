@@ -250,3 +250,13 @@ body::before {
 .home-login + .hero { padding-top: 32px; }
 .nav a.nav-login { border: 1px solid rgba(255,255,255,.45); }
 @media (max-width: 640px) { .hl-form { grid-template-columns: 1fr; } }
+
+/* Drag-and-drop upload box (admin inbox) */
+.drop-zone {
+  border: 2px dashed var(--line); border-radius: var(--radius); padding: 22px 16px; text-align: center;
+  background: rgba(255, 255, 255, .7); transition: background .15s, border-color .15s; margin-bottom: 12px;
+}
+.drop-zone p { margin: 4px 0; }
+.drop-zone .drop-icon { font-size: 32px; line-height: 1; }
+.drop-zone input[type=file] { margin-top: 10px; max-width: 100%; }
+.drop-zone.over { border-color: var(--brand); background: var(--accent-soft); }
