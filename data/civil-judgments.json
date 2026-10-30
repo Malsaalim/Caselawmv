@@ -1,5 +1,29 @@
 [
  {
+  "id": "civil-3272-CVC-2026",
+  "caseNo": "3272-CVC-2026",
+  "kind": "ވަގުތީ އަމުރު",
+  "plaintiff": "އިސްމާޢީލް ޝާފިޢު، މޫންލައިޓްވިޔޫ / ބ. ގޮއިދޫ",
+  "defendant": "ޞަފޫރާ ޞަބާޙް، މއ. ސެންޓްރީޓާ / މާލެ، މުޙައްމަދު ޞަބާޙް، މއ. ސެންޓްރީޓާ / މާލެ، ނުޒުހާ އަބޫބަކުރު، މއ. ސެންޓްރީޓާ / މާލެ",
+  "subject": "-",
+  "date": "2026-10-29",
+  "court": "ސިވިލް ކޯޓު",
+  "pdf": "https://civilcourt.gov.mv/vaguthee_amuru_2026/144-B15-VA-3272-2026-2026-01.pdf",
+  "eligible": false
+ },
+ {
+  "id": "civil-250-CVC-2026",
+  "caseNo": "250-CVC-2026",
+  "kind": "ޤަޟިއްޔާ ނިމުނުގޮތް",
+  "plaintiff": "އެސްރާ މުޙައްމަދު ސަމީރު ބިލާލް، ސީރިއާ",
+  "defendant": "ވައްބިންވެސްޓް މޯލްޑިވްސް ޕްރައިވެޓް ލިމިޓެޑް",
+  "subject": "އިހުމާލުވުމުގެ ސަބަބުން ހަށިގަނޑަށް ލިބޭ އަނިޔާގެ މައްސަލަ",
+  "date": "2026-10-29",
+  "court": "ސިވިލް ކޯޓު",
+  "pdf": "https://civilcourt.gov.mv/gaziyya_nimunugoi_2026/250-CVC-2026.pdf",
+  "eligible": true
+ },
+ {
   "id": "civil-996-CVC-2026",
   "caseNo": "996-CVC-2026",
   "kind": "ޤަޟިއްޔާ ނިމުނުގޮތް",
@@ -9,6 +33,18 @@
   "date": "2026-10-28",
   "court": "ސިވިލް ކޯޓު",
   "pdf": "https://civilcourt.gov.mv/gaziyya_nimunugoi_2026/996-CVC-2026.pdf",
+  "eligible": true
+ },
+ {
+  "id": "civil-403-CVCHD-2026",
+  "caseNo": "403-CVCHD-2026",
+  "kind": "ޤަޟިއްޔާ ނިމުނުގޮތް",
+  "plaintiff": "ދިވެހިރާއްޖޭގެ ގުޅުން ޕަބްލިކް ލިމިޓެޑް ކޮމްޕެނީ",
+  "defendant": "ޞަބާޙާ ޢަބްދުލްމުޙްސިން، ހެޕީސައިޑް / ގއ. ދާންދޫ",
+  "subject": "މަސައްކަތާއި މުދަލާއި ޚިދުމަތުގެ އަގު ހޯދުމަށް އެދި ހުށަހަޅާ މައްސަލަ",
+  "date": "2026-10-28",
+  "court": "ސިވިލް ކޯޓު",
+  "pdf": "https://civilcourt.gov.mv/gaziyya_nimunugoi_2026/403-CVCHD-2026.pdf",
   "eligible": true
  },
  {
@@ -48,6 +84,30 @@
   "eligible": false
  },
  {
+  "id": "civil-3347-CVC-2026",
+  "caseNo": "3347-CVC-2026",
+  "kind": "ޤަޟިއްޔާ ނިމުނުގޮތް",
+  "plaintiff": "ބޭންކް އޮފް މޯލްޑިވްސް ޕލކ",
+  "defendant": "އިބްރާހީމް ޞަބުރީ، ބިންބިމާގެ / ސ. ހިތަދޫ",
+  "subject": "ރަހުނު ހިމެނޭ ފައިސާގެ ތަންފީޛީ މައްސަލަ",
+  "date": "2026-10-28",
+  "court": "ސިވިލް ކޯޓު",
+  "pdf": "https://civilcourt.gov.mv/gaziyya_nimunugoi_2026/3347-CVC-2026.pdf",
+  "eligible": false
+ },
+ {
+  "id": "civil-3188-CVC-2026",
+  "caseNo": "3188-CVC-2026",
+  "kind": "ޤަޟިއްޔާ ނިމުނުގޮތް",
+  "plaintiff": "ބޭންކް އޮފް މޯލްޑިވްސް ޕލކ",
+  "defendant": "މުޙައްމަދު މަޙްމޫން، އަނބުމާގެ / ސ. ފޭދޫ",
+  "subject": "ރަހުނު ނުހިމެނޭ ފައިސާގެ ތަންފީޛީ މައްސަލަ",
+  "date": "2026-10-28",
+  "court": "ސިވިލް ކޯޓު",
+  "pdf": "https://civilcourt.gov.mv/gaziyya_nimunugoi_2026/3188-CVC-2026.pdf",
+  "eligible": false
+ },
+ {
   "id": "civil-3076-CVC-2026",
   "caseNo": "3076-CVC-2026",
   "kind": "ޤަޟިއްޔާ ނިމުނުގޮތް",
@@ -57,6 +117,18 @@
   "date": "2026-10-28",
   "court": "ސިވިލް ކޯޓު",
   "pdf": "https://civilcourt.gov.mv/gaziyya_nimunugoi_2026/3076-CVC-2026.pdf",
+  "eligible": false
+ },
+ {
+  "id": "civil-3028-CVC-2026",
+  "caseNo": "3028-CVC-2026",
+  "kind": "ޤަޟިއްޔާ ނިމުނުގޮތް",
+  "plaintiff": "ބޭންކް އޮފް މޯލްޑިވްސް ޕލކ",
+  "defendant": "ޢަބްދުﷲ ޒިޔާމް، މއ. ފޮގެޓްމީނޮޓް / މާލެ",
+  "subject": "ރަހުނު ނުހިމެނޭ ބޭންކިންގ މުޢާމަލާތްތަކާގުޅޭ މައްސަލަ",
+  "date": "2026-10-28",
+  "court": "ސިވިލް ކޯޓު",
+  "pdf": "https://civilcourt.gov.mv/gaziyya_nimunugoi_2026/3028-CVC-2026.pdf",
   "eligible": false
  },
  {
@@ -108,6 +180,18 @@
   "eligible": false
  },
  {
+  "id": "civil-2905-CVC-2026",
+  "caseNo": "2905-CVC-2026",
+  "kind": "ޤަޟިއްޔާ ނިމުނުގޮތް",
+  "plaintiff": "އަޙްމަދު ލަބީބް، ޕޭންޓްލޭންޑް / ބ. އޭދަފުށި",
+  "defendant": "ފާޠިމަތު ލީޒާ، ވައިލެޓްހައުސް / ތ. ކިނބިދޫ",
+  "subject": "ބިމާއި ޢިމާރާތް ކުއްޔަށް ދިނުމާބެހޭ މައްސަލަ",
+  "date": "2026-10-28",
+  "court": "ސިވިލް ކޯޓު",
+  "pdf": "https://civilcourt.gov.mv/gaziyya_nimunugoi_2026/2905-CVC-2026.pdf",
+  "eligible": true
+ },
+ {
   "id": "civil-2791-CVC-2026",
   "caseNo": "2791-CVC-2026",
   "kind": "ޤަޟިއްޔާ ނިމުނުގޮތް",
@@ -117,6 +201,18 @@
   "date": "2026-10-28",
   "court": "ސިވިލް ކޯޓު",
   "pdf": "https://civilcourt.gov.mv/gaziyya_nimunugoi_2026/2791-CVC-2026.pdf",
+  "eligible": false
+ },
+ {
+  "id": "civil-2705-CVC-2026",
+  "caseNo": "2705-CVC-2026",
+  "kind": "ޤަޟިއްޔާ ނިމުނުގޮތް",
+  "plaintiff": "ބޭންކް އޮފް މޯލްޑިވްސް ޕލކ",
+  "defendant": "ޙަސަން ހަމީޒު، މއ. އަލްޕައިން / މާލެ",
+  "subject": "ރަހުނު ނުހިމެނޭ ބޭންކިންގ މުޢާމަލާތްތަކާގުޅޭ މައްސަލަ",
+  "date": "2026-10-28",
+  "court": "ސިވިލް ކޯޓު",
+  "pdf": "https://civilcourt.gov.mv/gaziyya_nimunugoi_2026/2705-CVC-2026.pdf",
   "eligible": false
  },
  {
@@ -130,6 +226,18 @@
   "court": "ސިވިލް ކޯޓު",
   "pdf": "https://civilcourt.gov.mv/gaziyya_nimunugoi_2026/2570-CVC-2026.pdf",
   "eligible": false
+ },
+ {
+  "id": "civil-2232-CVC-2026",
+  "caseNo": "2232-CVC-2026",
+  "kind": "ޤަޟިއްޔާ ނިމުނުގޮތް",
+  "plaintiff": "ޖަވާޒާ މޫސާ، މ. އާމުރަނގަ / މާލެ",
+  "defendant": "ޙަބީބާ އިބްރާހީމް، މ. ދިރިމާހިޔާ / މާލެ، މަރްޔަމް ޝަފީޤާ، ހުޅުމާލެ. ގޯތި ނަންބަރު 11206 / މާލެ، ފާޠިމަތު ޝަފީޤާ، ގ. މުރަނގަމާއާގެ / މާލެ",
+  "subject": "ތަރިކައިގެ މައްސަލަ",
+  "date": "2026-10-28",
+  "court": "ސިވިލް ކޯޓު",
+  "pdf": "https://civilcourt.gov.mv/gaziyya_nimunugoi_2026/2232-CVC-2026.pdf",
+  "eligible": true
  },
  {
   "id": "civil-2161-CVC-2026",
@@ -228,6 +336,18 @@
   "eligible": true
  },
  {
+  "id": "civil-361-CVCHD-2026",
+  "caseNo": "361-CVCHD-2026",
+  "kind": "ޤަޟިއްޔާ ނިމުނުގޮތް",
+  "plaintiff": "ހައުސިންގ ޑިވެލޮޕްމަންޓް ކޯޕަރޭޝަން ލިމިޓެޑް",
+  "defendant": "އަޙްމަދު ރުސްތުމް، ހުޅުމާލެ، ފްލެޓް ނަންބަރު 03-ޖީ-11 / މާލެ",
+  "subject": "ބިމާއި އިމާރާތް ވިއްކުމުގެ މައްސަލަ",
+  "date": "2026-10-27",
+  "court": "ސިވިލް ކޯޓު",
+  "pdf": "https://civilcourt.gov.mv/gaziyya_nimunugoi_2026/361-CVCHD-2026.pdf",
+  "eligible": true
+ },
+ {
   "id": "civil-3295-CVC-2026",
   "caseNo": "3295-CVC-2026",
   "kind": "ޤަޟިއްޔާ ނިމުނުގޮތް",
@@ -244,7 +364,7 @@
   "caseNo": "303-CVCHD-2026",
   "kind": "އިޙްތިޞާޞް އާއިމެދު ނިންމިގޮތް",
   "plaintiff": "ފާތިމަތު ޝިފާޢު، މ. ޞަބްރު / މާލެ",
-  "defendant": "\"ޖާހު އިންވެސްޓްމަންޓްސް ޕްރައިވެޓް ލިމިޓެޑް ހައުސިންގ ޑިވެލޮޕްމަންޓް ކޯޕަރޭޝަން ލިމިޓެޑް ޖާހު ޕްރައިވެޓް ލިމިޓެޑް އަޙްމަދު ޖަހުދާނ",
+  "defendant": "ޖާހު އިންވެސްޓްމަންޓް ޕްރައިވެޓް ލިމިޓެޑް، ހައުސިންގ ޑިވެލޮޕްމަންޓް ކޯޕަރޭޝަން ލިމިޓެޑް، ޖާހު ޕްރައިވެޓް ލިމިޓެޑް",
   "subject": "-",
   "date": "2026-10-27",
   "court": "ސިވިލް ކޯޓު",
@@ -357,6 +477,18 @@
   "date": "2026-10-27",
   "court": "ސިވިލް ކޯޓު",
   "pdf": "https://civilcourt.gov.mv/gaziyya_nimunugoi_2026/2442-CVC-2026.pdf",
+  "eligible": false
+ },
+ {
+  "id": "civil-2400-CVC-2026",
+  "caseNo": "2400-CVC-2026",
+  "kind": "އިޙްތިޞާޞް އާއިމެދު ނިންމިގޮތް",
+  "plaintiff": "ޖިރީ ބަރޓޮނެކް / ޗެކްރިޕަބްލިކް",
+  "defendant": "ނަސީމް އިސްމާޢީލް، ގ. ގަދަކޯޅިގެ / މާލެ",
+  "subject": "-",
+  "date": "2026-10-27",
+  "court": "ސިވިލް ކޯޓު",
+  "pdf": "https://civilcourt.gov.mv/ihthisoas_2026/144-B11-IN-2400-2026-2026-03.pdf",
   "eligible": false
  },
  {
@@ -490,6 +622,18 @@
   "court": "ސިވިލް ކޯޓު",
   "pdf": "https://civilcourt.gov.mv/gaziyya_nimunugoi_2026/3330-CVC-2026.pdf",
   "eligible": false
+ },
+ {
+  "id": "civil-329-CVCHD-2026",
+  "caseNo": "329-CVCHD-2026",
+  "kind": "ޤަޟިއްޔާ ނިމުނުގޮތް",
+  "plaintiff": "ޙުސައިން ޢަބްދުﷲ، ދަފްތަރު. ނަންބަރު ރސ 4815 / މާލެ",
+  "defendant": "ހަންބޯ ކޮމްޕެނީ ޕްރައިވެޓް ލިމިޓެޑް",
+  "subject": "އެއްބަސްވުމާއި ޚިލާފު އުފެދިގެން ހުށަހަޅާ މައްސަލަ",
+  "date": "2026-10-26",
+  "court": "ސިވިލް ކޯޓު",
+  "pdf": "https://civilcourt.gov.mv/gaziyya_nimunugoi_2026/329-CVCHD-2026.pdf",
+  "eligible": true
  },
  {
   "id": "civil-3249-CVC-2026",
